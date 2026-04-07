@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'; // React needed for React.Fragment
-import { authFetch, getToken } from '../auth';
 
 const API = '/api/cars';
 
@@ -23,10 +22,7 @@ function ImageGallery({ carId }) {
     setUploading(true);
     const fd = new FormData();
     fd.append('image', file);
-    await fetch(`${API}/${carId}/images`, {
-      method: 'POST', body: fd,
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    await fetch(`${API}/${carId}/images`, { method: 'POST', body: fd });
     await fetchImages();
     setUploading(false);
     fileRef.current.value = '';
@@ -34,7 +30,7 @@ function ImageGallery({ carId }) {
 
   const handleDelete = async (imageId) => {
     if (!window.confirm('Delete this image?')) return;
-    await authFetch(`${API}/${carId}/images/${imageId}`, { method: 'DELETE' });
+    await fetch(`${API}/${carId}/images/${imageId}`, { method: 'DELETE' });
     fetchImages();
   };
 
@@ -100,8 +96,9 @@ export default function CarsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const res = await authFetch(API, {
+    const res = await fetch(API, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });
     const data = await res.json();
@@ -114,8 +111,9 @@ export default function CarsPage() {
   };
 
   const updateStatus = async (id, status) => {
-    await authFetch(`${API}/${id}/status`, {
+    await fetch(`${API}/${id}/status`, {
       method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
     fetchCars();

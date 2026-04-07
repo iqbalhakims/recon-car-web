@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { authFetch } from '../auth';
 
 const API_LEADS = '/api/leads';
 const API_CARS = '/api/cars';
@@ -11,7 +10,7 @@ export default function LeadsPage() {
   const [error, setError] = useState('');
 
   const fetchAll = async () => {
-    const [lRes, cRes] = await Promise.all([authFetch(API_LEADS), fetch(API_CARS)]);
+    const [lRes, cRes] = await Promise.all([fetch(API_LEADS), fetch(API_CARS)]);
     const [lData, cData] = await Promise.all([lRes.json(), cRes.json()]);
     if (lData.success) setLeads(lData.data);
     if (cData.success) setCars(cData.data);
@@ -22,8 +21,9 @@ export default function LeadsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const res = await authFetch(API_LEADS, {
+    const res = await fetch(API_LEADS, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });
     const data = await res.json();
@@ -36,8 +36,9 @@ export default function LeadsPage() {
   };
 
   const updateLead = async (id, status) => {
-    await authFetch(`${API_LEADS}/${id}`, {
+    await fetch(`${API_LEADS}/${id}`, {
       method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
     fetchAll();

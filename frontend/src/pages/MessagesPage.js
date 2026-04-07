@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { authFetch } from '../auth';
 
 export default function MessagesPage() {
   const [cars, setCars] = useState([]);
@@ -18,8 +17,9 @@ export default function MessagesPage() {
     setError('');
     setMessage('');
     if (!carId) return setError('Please select a car');
-    const res = await authFetch('/api/messages/generate', {
+    const res = await fetch('/api/messages/generate', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ car_id: carId }),
     });
     const data = await res.json();
