@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment
+.env
+backend/.env
+
+# Uploads (don't commit user images)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Build
+frontend/build/
+
+# Docker
+.terraform/
+
+# OS
+.DS_Store
