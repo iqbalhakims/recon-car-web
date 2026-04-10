@@ -21,6 +21,7 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           use_insecure_cipher: false
+          command_timeout: 30m
           script: |
             export PATH=$PATH:/usr/bin:/usr/local/bin
             cd /opt/salesme
