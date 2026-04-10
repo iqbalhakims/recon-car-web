@@ -79,6 +79,80 @@ function ImageGallery({ carId }) {
   );
 }
 
+function VideoGallery({ carId }) {
+  const [videos, setVideos] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const fileRef = useRef();
+
+  const fetchVideos = async () => {
+    const res = await fetch(`${API}/${carId}/videos`);
+    const data = await res.json();
+    if (data.success) setVideos(data.data);
+  };
+
+  useEffect(() => { fetchVideos(); }, [carId]);
+
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    setProgress(0);
+    const fd = new FormData();
+    fd.append('video', file);
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (ev) => {
+      if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100));
+    };
+    xhr.onload = async () => {
+      await fetchVideos();
+      setUploading(false);
+      setProgress(0);
+      fileRef.current.value = '';
+    };
+    xhr.open('POST', `${API}/${carId}/videos`);
+    xhr.send(fd);
+  };
+
+  const handleDelete = async (videoId) => {
+    if (!window.confirm('Delete this video?')) return;
+    await fetch(`${API}/${carId}/videos/${videoId}`, { method: 'DELETE' });
+    fetchVideos();
+  };
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {videos.map(vid => (
+          <div key={vid.id} style={{ position: 'relative', display: 'inline-block' }}>
+            <video
+              src={`/uploads/${vid.filename}`}
+              controls
+              style={{ width: '100%', maxWidth: 320, borderRadius: 6, border: '2px solid #eee' }}
+            />
+            <button
+              onClick={() => handleDelete(vid.id)}
+              style={{
+                position: 'absolute', top: 4, right: 4,
+                background: '#e94560', color: 'white', border: 'none',
+                borderRadius: '50%', width: 22, height: 22, fontSize: 11,
+                cursor: 'pointer', lineHeight: '22px', textAlign: 'center', padding: 0,
+              }}>✕</button>
+          </div>
+        ))}
+        <label style={{
+          width: 120, border: '2px dashed #ccc', borderRadius: 6, padding: '8px 12px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: uploading ? 'default' : 'pointer', color: '#aaa', fontSize: '0.85rem', gap: 6,
+        }}>
+          {uploading ? `Uploading ${progress}%` : '🎥 Add Video'}
+          <input type="file" accept="video/*" ref={fileRef} onChange={handleUpload} style={{ display: 'none' }} disabled={uploading} />
+        </label>
+      </div>
+    </div>
+  );
+}
+
 export default function CarsPage() {
   const [cars, setCars] = useState([]);
   const [form, setForm] = useState({ model: '', price: '', mileage: '', condition: '' });
@@ -223,10 +297,10 @@ export default function CarsPage() {
                   {expanded === car.id && (
                     <tr>
                       <td colSpan="7" style={{ background: '#fafafa', padding: '12px 16px' }}>
-                        <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 8 }}>
-                          Click <strong>+</strong> to upload · Click photo to preview · <strong>✕</strong> to delete
-                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>📷 Photos</div>
                         <ImageGallery carId={car.id} />
+                        <div style={{ fontSize: '0.85rem', color: '#555', margin: '12px 0 6px' }}>🎥 Videos</div>
+                        <VideoGallery carId={car.id} />
                       </td>
                     </tr>
                   )}

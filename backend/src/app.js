@@ -7,6 +7,7 @@ const carRoutes = require('./routes/carRoutes');
 const leadRoutes = require('./routes/leadRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const authRoutes = require('./routes/authRoutes');
+const videoRoutes = require('./routes/videoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cars', carRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/cars/:id/videos', videoRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Car Sales CRM API is running' });
