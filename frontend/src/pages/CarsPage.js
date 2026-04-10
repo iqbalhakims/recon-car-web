@@ -152,15 +152,24 @@ export default function CarsPage() {
 
         <div className="card">
           <h2>Car Inventory ({cars.length})</h2>
-          <table>
+          <div style={{ overflowX: 'auto' }}><table>
             <thead>
-              <tr><th>Model</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th>Photos</th><th></th></tr>
+              <tr><th>Model</th><th>Photos</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th></tr>
             </thead>
             <tbody>
               {cars.map(car => (
                 <React.Fragment key={car.id}>
                   <tr>
                     <td>{car.model}</td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => setExpanded(expanded === car.id ? null : car.id)}
+                        style={{ whiteSpace: 'nowrap' }}
+                      >
+                        {expanded === car.id ? '▲ Hide' : '📷 Photos'}
+                      </button>
+                    </td>
                     <td>RM{car.price?.toLocaleString()}</td>
                     <td>{car.mileage?.toLocaleString()} km</td>
                     <td><span className={statusClass(car.status)}>{car.status}</span></td>
@@ -172,15 +181,6 @@ export default function CarsPage() {
                         <option value="reserved">Reserved</option>
                         <option value="sold">Sold</option>
                       </select>
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => setExpanded(expanded === car.id ? null : car.id)}
-                        style={{ whiteSpace: 'nowrap' }}
-                      >
-                        {expanded === car.id ? '▲ Hide' : '📷 Photos'}
-                      </button>
                     </td>
                     <td>
                       <button
@@ -206,7 +206,7 @@ export default function CarsPage() {
               ))}
               {cars.length === 0 && <tr><td colSpan="7" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
     </div>
