@@ -82,6 +82,8 @@ function ImageGallery({ carId }) {
 export default function CarsPage() {
   const [cars, setCars] = useState([]);
   const [form, setForm] = useState({ model: '', price: '', mileage: '', condition: '' });
+  const [photos, setPhotos] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(null);
 
@@ -96,6 +98,7 @@ export default function CarsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
     const res = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -103,11 +106,19 @@ export default function CarsPage() {
     });
     const data = await res.json();
     if (data.success) {
+      const carId = data.data.id;
+      for (const file of photos) {
+        const fd = new FormData();
+        fd.append('image', file);
+        await fetch(`${API}/${carId}/images`, { method: 'POST', body: fd });
+      }
       setForm({ model: '', price: '', mileage: '', condition: '' });
+      setPhotos([]);
       fetchCars();
     } else {
       setError(data.message);
     }
+    setSubmitting(false);
   };
 
   const deleteCar = async (id, model) => {
@@ -146,7 +157,24 @@ export default function CarsPage() {
               value={form.mileage} onChange={e => setForm({ ...form, mileage: e.target.value })} />
             <input placeholder="Condition (e.g. Good)"
               value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })} />
-            <button type="submit" className="btn btn-primary">Add Car</button>
+            <label style={{
+              border: '2px dashed #ccc', borderRadius: 6, padding: '10px 12px',
+              cursor: 'pointer', color: '#888', fontSize: '0.95rem', textAlign: 'center',
+            }}>
+              {photos.length > 0 ? `${photos.length} photo${photos.length > 1 ? 's' : ''} selected` : '📷 Add Photos (optional)'}
+              <input type="file" accept="image/*" multiple onChange={e => setPhotos(Array.from(e.target.files))} style={{ display: 'none' }} />
+            </label>
+            {photos.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {photos.map((f, i) => (
+                  <img key={i} src={URL.createObjectURL(f)} alt="preview"
+                    style={{ width: 60, height: 50, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }} />
+                ))}
+              </div>
+            )}
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? 'Adding...' : 'Add Car'}
+            </button>
           </form>
         </div>
 
