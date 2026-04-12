@@ -2,6 +2,25 @@ import React, { useState, useEffect, useRef } from 'react'; // React needed for 
 
 const API = '/api/cars';
 
+function resizeImage(file, maxPx = 1200, quality = 0.82) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width <= maxPx && height <= maxPx) { resolve(file); return; }
+      if (width > height) { height = Math.round(height * maxPx / width); width = maxPx; }
+      else { width = Math.round(width * maxPx / height); height = maxPx; }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', quality);
+    };
+    img.src = url;
+  });
+}
+
 function ImageGallery({ carId }) {
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -20,11 +39,12 @@ function ImageGallery({ carId }) {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     setUploading(true);
-    for (const file of files) {
+    const resized = await Promise.all(files.map(f => resizeImage(f)));
+    await Promise.all(resized.map(file => {
       const fd = new FormData();
       fd.append('image', file);
-      await fetch(`${API}/${carId}/images`, { method: 'POST', body: fd });
-    }
+      return fetch(`${API}/${carId}/images`, { method: 'POST', body: fd });
+    }));
     await fetchImages();
     setUploading(false);
     fileRef.current.value = '';
@@ -183,10 +203,13 @@ export default function CarsPage() {
     const data = await res.json();
     if (data.success) {
       const carId = data.data.id;
-      for (const file of photos) {
-        const fd = new FormData();
-        fd.append('image', file);
-        await fetch(`${API}/${carId}/images`, { method: 'POST', body: fd });
+      if (photos.length) {
+        const resized = await Promise.all(photos.map(f => resizeImage(f)));
+        await Promise.all(resized.map(file => {
+          const fd = new FormData();
+          fd.append('image', file);
+          return fetch(`${API}/${carId}/images`, { method: 'POST', body: fd });
+        }));
       }
       setForm({ model: '', price: '', mileage: '', condition: '' });
       setPhotos([]);
