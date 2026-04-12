@@ -43,7 +43,7 @@ export default function CarDetailPage() {
         <div className="detail-gallery">
           <div className="detail-main-img">
             {images.length > 0
-              ? <img src={`http://localhost:3000/uploads/${images[active].filename}`} alt={car.model} />
+              ? <img src={`/uploads/${images[active].filename}`} alt={car.model} />
               : <div className="pub-card-img-placeholder large">🚗</div>
             }
           </div>
@@ -52,7 +52,7 @@ export default function CarDetailPage() {
               {images.map((img, i) => (
                 <img
                   key={img.id}
-                  src={`http://localhost:3000/uploads/${img.filename}`}
+                  src={`/uploads/${img.filename}`}
                   alt=""
                   className={i === active ? 'thumb active' : 'thumb'}
                   onClick={() => setActive(i)}
