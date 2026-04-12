@@ -75,7 +75,7 @@ jobs:
             ADMIN_PASSWORD=$ADMIN_PASSWORD
             JWT_SECRET=$JWT_SECRET
             ENVEOF
-            docker compose pull
+            docker compose pull frontend backend
             docker compose up -d
             docker image prune -f
         env:
