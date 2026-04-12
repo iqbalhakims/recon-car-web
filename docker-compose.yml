@@ -38,10 +38,10 @@ services:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$DB_PASSWORD --silent 2>/dev/null"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   prometheus:
     image: prom/prometheus:latest
