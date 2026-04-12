@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'; // React needed for 
 
 const API = '/api/cars';
 
-function resizeImage(file, maxPx = 1200, quality = 0.82) {
+function resizeImage(file, maxPx = 1200, quality = 0.7) {
   return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
