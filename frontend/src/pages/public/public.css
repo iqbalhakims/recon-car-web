@@ -103,6 +103,17 @@
 }
 .wa-cta-btn:hover { background: #1db954; }
 
+/* Loan Calculator section */
+.calc-section {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+.calc-section .calc-wrap {
+  width: 100%;
+  max-width: 600px;
+}
+
 /* Loan Calculator */
 .calc-wrap { background: #f7f8fa; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .calc-title { margin: 0; font-size: 1rem; font-weight: 700; color: #1a1a2e; }

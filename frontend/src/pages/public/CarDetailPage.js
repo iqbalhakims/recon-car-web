@@ -138,84 +138,89 @@ export default function CarDetailPage() {
         </div>
       </header>
 
-      <main className="pub-main detail-wrap">
-        {/* Gallery */}
-        <div className="detail-gallery">
-          <div className="detail-main-img" onClick={() => images.length > 0 && setLightbox(true)} style={{ cursor: images.length > 0 ? 'zoom-in' : 'default' }}>
-            {images.length > 0
-              ? <img src={`/uploads/${images[active].filename}`} alt={car.model} />
-              : <div className="pub-card-img-placeholder large">🚗</div>
-            }
-          </div>
-          {images.length > 1 && (
-            <div className="detail-thumbs">
-              {images.map((img, i) => (
-                <img
-                  key={img.id}
-                  src={`/uploads/${img.filename}`}
-                  alt=""
-                  className={i === active ? 'thumb active' : 'thumb'}
-                  onClick={() => setActive(i)}
-                />
-              ))}
+      <main className="pub-main">
+        <div className="detail-wrap">
+          {/* Gallery */}
+          <div className="detail-gallery">
+            <div className="detail-main-img" onClick={() => images.length > 0 && setLightbox(true)} style={{ cursor: images.length > 0 ? 'zoom-in' : 'default' }}>
+              {images.length > 0
+                ? <img src={`/uploads/${images[active].filename}`} alt={car.model} />
+                : <div className="pub-card-img-placeholder large">🚗</div>
+              }
             </div>
-          )}
+            {images.length > 1 && (
+              <div className="detail-thumbs">
+                {images.map((img, i) => (
+                  <img
+                    key={img.id}
+                    src={`/uploads/${img.filename}`}
+                    alt=""
+                    className={i === active ? 'thumb active' : 'thumb'}
+                    onClick={() => setActive(i)}
+                  />
+                ))}
+              </div>
+            )}
 
-          {lightbox && (
-            <div className="lightbox-overlay" onClick={() => setLightbox(false)}>
-              <button className="lightbox-close" onClick={() => setLightbox(false)}>✕</button>
-              <img
-                src={`/uploads/${images[active].filename}`}
-                alt={car.model}
-                className="lightbox-img"
-                onClick={e => e.stopPropagation()}
-              />
-              {images.length > 1 && (
-                <>
-                  <button className="lightbox-prev" onClick={e => { e.stopPropagation(); setActive(i => (i - 1 + images.length) % images.length); }}>‹</button>
-                  <button className="lightbox-next" onClick={e => { e.stopPropagation(); setActive(i => (i + 1) % images.length); }}>›</button>
-                </>
-              )}
+            {lightbox && (
+              <div className="lightbox-overlay" onClick={() => setLightbox(false)}>
+                <button className="lightbox-close" onClick={() => setLightbox(false)}>✕</button>
+                <img
+                  src={`/uploads/${images[active].filename}`}
+                  alt={car.model}
+                  className="lightbox-img"
+                  onClick={e => e.stopPropagation()}
+                />
+                {images.length > 1 && (
+                  <>
+                    <button className="lightbox-prev" onClick={e => { e.stopPropagation(); setActive(i => (i - 1 + images.length) % images.length); }}>‹</button>
+                    <button className="lightbox-next" onClick={e => { e.stopPropagation(); setActive(i => (i + 1) % images.length); }}>›</button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="detail-info">
+            <h2 className="detail-title">{car.model}</h2>
+            <p className="detail-price">RM {car.price?.toLocaleString()}</p>
+
+            <div className="detail-specs">
+              <div className="spec-row">
+                <span className="spec-label">Mileage</span>
+                <span className="spec-value">{car.mileage?.toLocaleString()} km</span>
+              </div>
+              <div className="spec-row">
+                <span className="spec-label">Condition</span>
+                <span className="spec-value">{car.condition || '—'}</span>
+              </div>
+              <div className="spec-row">
+                <span className="spec-label">Status</span>
+                <span className="spec-value" style={{ color: '#27ae60', fontWeight: 700 }}>Available</span>
+              </div>
             </div>
-          )}
+
+            <div className="detail-perks">
+              <span>✅ Full loan can arrange</span>
+              <span>✅ Low deposit</span>
+              <span>✅ Viewing available</span>
+            </div>
+
+            <a
+              href={`https://wa.me/60134107845?text=${waMsg}`}
+              target="_blank"
+              rel="noreferrer"
+              className="wa-cta-btn"
+            >
+              💬 WhatsApp to Enquire
+            </a>
+          </div>
         </div>
 
-        {/* Info */}
-        <div className="detail-info">
-          <h2 className="detail-title">{car.model}</h2>
-          <p className="detail-price">RM {car.price?.toLocaleString()}</p>
-
-          <div className="detail-specs">
-            <div className="spec-row">
-              <span className="spec-label">Mileage</span>
-              <span className="spec-value">{car.mileage?.toLocaleString()} km</span>
-            </div>
-            <div className="spec-row">
-              <span className="spec-label">Condition</span>
-              <span className="spec-value">{car.condition || '—'}</span>
-            </div>
-            <div className="spec-row">
-              <span className="spec-label">Status</span>
-              <span className="spec-value" style={{ color: '#27ae60', fontWeight: 700 }}>Available</span>
-            </div>
-          </div>
-
-          <div className="detail-perks">
-            <span>✅ Full loan can arrange</span>
-            <span>✅ Low deposit</span>
-            <span>✅ Viewing available</span>
-          </div>
-
+        {/* Loan Calculator — full width below */}
+        <div className="calc-section">
           <LoanCalculator carPrice={car.price || 0} />
-
-          <a
-            href={`https://wa.me/60134107845?text=${waMsg}`}
-            target="_blank"
-            rel="noreferrer"
-            className="wa-cta-btn"
-          >
-            💬 WhatsApp to Enquire
-          </a>
         </div>
       </main>
     </div>
