@@ -103,6 +103,35 @@
 }
 .wa-cta-btn:hover { background: #1db954; }
 
+/* Loan Calculator */
+.calc-wrap { background: #f7f8fa; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.calc-title { margin: 0; font-size: 1rem; font-weight: 700; color: #1a1a2e; }
+.calc-fields { display: flex; flex-direction: column; gap: 12px; }
+.calc-field { display: flex; flex-direction: column; gap: 6px; }
+.calc-field label { font-size: 0.82rem; font-weight: 600; color: #555; }
+.calc-field input {
+  padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 0.95rem; outline: none; width: 100%; box-sizing: border-box;
+}
+.calc-field input:focus { border-color: #e94560; }
+.calc-hint { font-size: 0.75rem; color: #aaa; }
+.tenure-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.tenure-btn {
+  padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px;
+  background: white; font-size: 0.82rem; cursor: pointer; color: #555;
+  transition: all 0.15s;
+}
+.tenure-btn.active { background: #e94560; border-color: #e94560; color: white; font-weight: 700; }
+.tenure-btn:hover:not(.active) { border-color: #e94560; color: #e94560; }
+.calc-result { display: flex; flex-direction: column; gap: 10px; }
+.calc-monthly { background: #1a1a2e; border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; }
+.calc-monthly-label { color: #aaa; font-size: 0.85rem; }
+.calc-monthly-value { color: #fff; font-size: 1.5rem; font-weight: 900; }
+.calc-breakdown { display: flex; flex-direction: column; gap: 6px; }
+.calc-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; }
+.calc-row span:last-child { font-weight: 600; color: #1a1a2e; }
+.calc-disclaimer { font-size: 0.72rem; color: #bbb; margin: 0; }
+
 /* Lightbox */
 .lightbox-overlay {
   position: fixed; inset: 0; z-index: 1000;

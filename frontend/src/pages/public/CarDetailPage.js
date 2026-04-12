@@ -2,6 +2,105 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './public.css';
 
+function LoanCalculator({ carPrice }) {
+  const [dp, setDp] = useState(Math.round(carPrice * 0.1));
+  const [tenure, setTenure] = useState(7);
+  const [ncd, setNcd] = useState(0);
+  const [rate] = useState(3.5);
+
+  const loanAmount = Math.max(0, carPrice - dp);
+  const totalInterest = loanAmount * (rate / 100) * tenure;
+  const totalPayable = loanAmount + totalInterest;
+  const monthly = tenure > 0 ? totalPayable / (tenure * 12) : 0;
+
+  // Rough insurance estimate (1.5% of car price) adjusted by NCD
+  const baseInsurance = carPrice * 0.015;
+  const insuranceAfterNcd = baseInsurance * (1 - ncd / 100);
+
+  const waMsg = encodeURIComponent(
+    `Hi, I'm interested in this car (RM${carPrice?.toLocaleString()}). Based on my calculation:\n` +
+    `- Down payment: RM${dp.toLocaleString()}\n` +
+    `- Tenure: ${tenure} years\n` +
+    `- Monthly installment: RM${Math.ceil(monthly).toLocaleString()}\n` +
+    `Can you help me proceed?`
+  );
+
+  return (
+    <div className="calc-wrap">
+      <h3 className="calc-title">💰 Loan Calculator</h3>
+
+      <div className="calc-fields">
+        <div className="calc-field">
+          <label>Down Payment (RM)</label>
+          <input
+            type="number"
+            value={dp}
+            min={0}
+            max={carPrice}
+            onChange={e => setDp(Number(e.target.value))}
+          />
+          <span className="calc-hint">{carPrice > 0 ? ((dp / carPrice) * 100).toFixed(0) : 0}% of car price</span>
+        </div>
+
+        <div className="calc-field">
+          <label>Loan Tenure</label>
+          <div className="tenure-btns">
+            {[1, 3, 5, 7, 9].map(y => (
+              <button
+                key={y}
+                className={tenure === y ? 'tenure-btn active' : 'tenure-btn'}
+                onClick={() => setTenure(y)}
+              >{y}yr</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="calc-field">
+          <label>NCD (%)</label>
+          <div className="tenure-btns">
+            {[0, 25, 30, 38.33, 45].map(n => (
+              <button
+                key={n}
+                className={ncd === n ? 'tenure-btn active' : 'tenure-btn'}
+                onClick={() => setNcd(n)}
+              >{n}%</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="calc-result">
+        <div className="calc-monthly">
+          <span className="calc-monthly-label">Est. Monthly</span>
+          <span className="calc-monthly-value">RM {Math.ceil(monthly).toLocaleString()}</span>
+        </div>
+        <div className="calc-breakdown">
+          <div className="calc-row">
+            <span>Loan amount</span>
+            <span>RM {loanAmount.toLocaleString()}</span>
+          </div>
+          <div className="calc-row">
+            <span>Interest ({rate}% flat × {tenure}yr)</span>
+            <span>RM {Math.round(totalInterest).toLocaleString()}</span>
+          </div>
+          <div className="calc-row">
+            <span>Total payable</span>
+            <span>RM {Math.round(totalPayable).toLocaleString()}</span>
+          </div>
+          <div className="calc-row">
+            <span>Est. insurance/yr {ncd > 0 ? `(${ncd}% NCD)` : ''}</span>
+            <span>RM {Math.round(insuranceAfterNcd).toLocaleString()}</span>
+          </div>
+        </div>
+        <p className="calc-disclaimer">* Estimate only. Actual rate subject to bank approval.</p>
+        <a href={`https://wa.me/60134107845?text=${waMsg}`} target="_blank" rel="noreferrer" className="wa-cta-btn">
+          💬 WhatsApp with This Calculation
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function CarDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -106,6 +205,8 @@ export default function CarDetailPage() {
             <span>✅ Low deposit</span>
             <span>✅ Viewing available</span>
           </div>
+
+          <LoanCalculator carPrice={car.price || 0} />
 
           <a
             href={`https://wa.me/60134107845?text=${waMsg}`}
