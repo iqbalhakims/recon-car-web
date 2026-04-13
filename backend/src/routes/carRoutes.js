@@ -6,6 +6,7 @@ const imageController = require('../controllers/imageController');
 
 router.get('/', carController.getAll);
 router.post('/', carController.create);
+router.put('/:id', carController.update);
 router.patch('/:id/status', carController.updateStatus);
 router.delete('/:id', carController.delete);
 

@@ -194,6 +194,8 @@ export default function CarsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(null);
+  const [editing, setEditing] = useState(null); // car id being edited
+  const [editForm, setEditForm] = useState({});
 
   const fetchCars = async () => {
     const res = await fetch(API);
@@ -247,6 +249,24 @@ export default function CarsPage() {
     fetchCars();
   };
 
+  const startEdit = (car) => {
+    setEditing(car.id);
+    setEditForm({ model: car.model || '', price: car.price || '', mileage: car.mileage || '', condition: car.condition || '', year: car.year || '', grade: car.grade || '' });
+  };
+
+  const cancelEdit = () => { setEditing(null); setEditForm({}); };
+
+  const saveEdit = async (id) => {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editForm),
+    });
+    const data = await res.json();
+    if (data.success) { cancelEdit(); fetchCars(); }
+    else alert(data.message);
+  };
+
   const statusClass = (s) => {
     if (s === 'available') return 'badge badge-available';
     if (s === 'sold') return 'badge badge-sold';
@@ -297,7 +317,7 @@ export default function CarsPage() {
           <h2>Car Inventory ({cars.length})</h2>
           <div className="table-wrap"><table>
             <thead>
-              <tr><th>Model</th><th>Photos</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th></tr>
+              <tr><th>Model</th><th>Photos</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
             </thead>
             <tbody>
               {cars.map(car => (
@@ -328,6 +348,15 @@ export default function CarsPage() {
                     <td>
                       <button
                         className="btn btn-sm"
+                        onClick={() => editing === car.id ? cancelEdit() : startEdit(car)}
+                        style={{ background: '#e8f0fe', color: '#1a56db', whiteSpace: 'nowrap' }}
+                      >
+                        {editing === car.id ? '✕ Cancel' : '✏️ Edit'}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm"
                         onClick={() => deleteCar(car.id, car.model)}
                         style={{ background: '#fde8ec', color: '#c0392b', whiteSpace: 'nowrap' }}
                       >
@@ -335,9 +364,24 @@ export default function CarsPage() {
                       </button>
                     </td>
                   </tr>
+                  {editing === car.id && (
+                    <tr>
+                      <td colSpan="8" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
+                          <input placeholder="Model" value={editForm.model} onChange={e => setEditForm({ ...editForm, model: e.target.value })} style={{ flex: '2 1 180px' }} />
+                          <input type="number" placeholder="Price" value={editForm.price} onChange={e => setEditForm({ ...editForm, price: e.target.value })} style={{ flex: '1 1 100px' }} />
+                          <input type="number" placeholder="Mileage" value={editForm.mileage} onChange={e => setEditForm({ ...editForm, mileage: e.target.value })} style={{ flex: '1 1 100px' }} />
+                          <input placeholder="Condition" value={editForm.condition} onChange={e => setEditForm({ ...editForm, condition: e.target.value })} style={{ flex: '1 1 100px' }} />
+                          <input type="number" placeholder="Year" value={editForm.year} onChange={e => setEditForm({ ...editForm, year: e.target.value })} style={{ flex: '1 1 80px' }} />
+                          <input placeholder="Grade" value={editForm.grade} onChange={e => setEditForm({ ...editForm, grade: e.target.value })} style={{ flex: '1 1 80px' }} />
+                          <button className="btn btn-primary btn-sm" onClick={() => saveEdit(car.id)}>💾 Save</button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                   {expanded === car.id && (
                     <tr>
-                      <td colSpan="7" style={{ background: '#fafafa', padding: '12px 16px' }}>
+                      <td colSpan="8" style={{ background: '#fafafa', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>📷 Photos</div>
                         <ImageGallery carId={car.id} />
                         <div style={{ fontSize: '0.85rem', color: '#555', margin: '12px 0 6px' }}>🎥 Videos</div>
@@ -347,7 +391,7 @@ export default function CarsPage() {
                   )}
                 </React.Fragment>
               ))}
-              {cars.length === 0 && <tr><td colSpan="7" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
+              {cars.length === 0 && <tr><td colSpan="8" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
             </tbody>
           </table></div>
         </div>

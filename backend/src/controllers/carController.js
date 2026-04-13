@@ -25,6 +25,24 @@ const carController = {
     }
   },
 
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+      const { model, price, mileage, condition, year, grade } = req.body;
+      if (!model || !price) {
+        return res.status(400).json({ success: false, message: 'model and price are required' });
+      }
+      const affected = await CarModel.update(id, { model, price, mileage, condition, year, grade });
+      if (!affected) {
+        return res.status(404).json({ success: false, message: 'Car not found' });
+      }
+      const car = await CarModel.getById(id);
+      res.json({ success: true, data: car });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  },
+
   async updateStatus(req, res) {
     try {
       const { id } = req.params;

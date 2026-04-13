@@ -25,6 +25,14 @@ const CarModel = {
     return result.insertId;
   },
 
+  async update(id, { model, price, mileage, condition, year, grade }) {
+    const [result] = await pool.query(
+      'UPDATE cars SET model=?, price=?, mileage=?, `condition`=?, year=?, grade=? WHERE id=?',
+      [model, price, mileage || null, condition || null, year || null, grade || null, id]
+    );
+    return result.affectedRows;
+  },
+
   async updateStatus(id, status) {
     const [result] = await pool.query(
       'UPDATE cars SET status = ? WHERE id = ?',
