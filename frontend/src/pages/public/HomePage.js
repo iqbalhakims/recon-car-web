@@ -72,6 +72,13 @@ export default function HomePage() {
   );
 }
 
+function estimateMonthly(price) {
+  if (!price) return null;
+  const loan = price * 0.9;
+  const total = loan + loan * 0.035 * 7;
+  return Math.ceil(total / (7 * 12));
+}
+
 function CarCard({ car, onClick }) {
   const [thumb, setThumb] = useState(null);
 
@@ -80,6 +87,8 @@ function CarCard({ car, onClick }) {
       .then(r => r.json())
       .then(d => { if (d.success && d.data.length) setThumb(d.data[0].filename); });
   }, [car.id]);
+
+  const monthly = estimateMonthly(car.price);
 
   return (
     <div className="pub-card" onClick={onClick}>
@@ -90,10 +99,13 @@ function CarCard({ car, onClick }) {
         }
       </div>
       <div className="pub-card-body">
-        <h3 className="pub-card-title">{car.model}</h3>
+        {monthly && <p className="pub-card-monthly">est. RM {monthly.toLocaleString()}/mo</p>}
         <p className="pub-card-price">RM {car.price?.toLocaleString()}</p>
-        <p className="pub-card-meta">{car.mileage?.toLocaleString()} km &nbsp;·&nbsp; {car.condition || 'N/A'}</p>
-        <span className="pub-badge">Available</span>
+        <h3 className="pub-card-title">{car.model}</h3>
+        <div className="pub-card-meta">
+          {car.mileage ? <span>🛣 {car.mileage.toLocaleString()} km</span> : null}
+          {car.condition ? <span>⚙️ {car.condition}</span> : null}
+        </div>
       </div>
     </div>
   );
