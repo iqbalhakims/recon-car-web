@@ -64,6 +64,8 @@ jobs:
             echo "$GHCR_TOKEN" | docker login ghcr.io -u iqbalhakims --password-stdin
             cd /opt/salesme
             git pull origin main
+            git submodule update --init --recursive
+            cd car-sales-crm
             printf "DB_PASSWORD=%s\nDB_NAME=carcrm\n" "$DB_PASSWORD" > .env
             mkdir -p backend
             printf "PORT=3000\nDB_HOST=db\nDB_USER=root\nDB_PASSWORD=%s\nDB_NAME=carcrm\nADMIN_USERNAME=%s\nADMIN_PASSWORD=%s\nJWT_SECRET=%s\n" "$DB_PASSWORD" "$ADMIN_USERNAME" "$ADMIN_PASSWORD" "$JWT_SECRET" > backend/.env
