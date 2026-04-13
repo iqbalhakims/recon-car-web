@@ -1,8 +1,14 @@
 const pool = require('../config/database');
 
 async function migrate() {
-  await pool.query("ALTER TABLE cars ADD COLUMN IF NOT EXISTS year INT AFTER `condition`");
-  await pool.query("ALTER TABLE cars ADD COLUMN IF NOT EXISTS grade VARCHAR(50) AFTER year");
+  const db = process.env.DB_NAME || 'carcrm';
+  const [cols] = await pool.query(
+    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'cars'",
+    [db]
+  );
+  const existing = cols.map(c => c.COLUMN_NAME);
+  if (!existing.includes('year'))  await pool.query("ALTER TABLE cars ADD COLUMN year INT AFTER `condition`");
+  if (!existing.includes('grade')) await pool.query("ALTER TABLE cars ADD COLUMN grade VARCHAR(50) AFTER year");
 }
 migrate().catch(err => console.error('Migration error:', err.message));
 
