@@ -1,5 +1,5 @@
 function generateMessage(car) {
-  const refNo = `REF-${String(car.id).padStart(4, '0')}`;
+  const refNo = car.ref_no || `REF-${String(car.id).padStart(4, '0')}`;
   const loanAmount = Math.round(car.price * 0.9);
   const totalPayable = loanAmount + loanAmount * 0.035 * 7;
   const monthly = Math.ceil(totalPayable / (7 * 12));

@@ -398,12 +398,13 @@ export default function CarsPage() {
           <h2>Car Inventory ({cars.length})</h2>
           <div className="table-wrap"><table>
             <thead>
-              <tr><th>Model</th><th>Photos</th><th>Dents</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
+              <tr><th>Ref</th><th>Model</th><th>Photos</th><th>Dents</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
             </thead>
             <tbody>
               {cars.map(car => (
                 <React.Fragment key={car.id}>
                   <tr>
+                    <td style={{ color: '#888', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{car.ref_no || '—'}</td>
                     <td>{car.model}</td>
                     <td>
                       <button

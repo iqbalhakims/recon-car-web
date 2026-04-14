@@ -194,6 +194,12 @@ export default function CarDetailPage() {
             <p className="detail-price">RM {car.price?.toLocaleString()}</p>
 
             <div className="detail-specs">
+              {car.ref_no && (
+                <div className="spec-row">
+                  <span className="spec-label">Ref No</span>
+                  <span className="spec-value">{car.ref_no}</span>
+                </div>
+              )}
               {car.year && (
                 <div className="spec-row">
                   <span className="spec-label">Year</span>
@@ -259,7 +265,7 @@ export default function CarDetailPage() {
             carPrice={car.price || 0}
             carModel={car.model}
             carYear={car.year}
-            carRef={`REF-${String(car.id).padStart(4, '0')}`}
+            carRef={car.ref_no || `REF-${String(car.id).padStart(4, '0')}`}
           />
         </div>
       </main>
