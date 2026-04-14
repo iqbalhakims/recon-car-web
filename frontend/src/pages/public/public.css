@@ -113,7 +113,7 @@
 .spec-label { color: #7a93a8; }
 .spec-value { font-weight: 600; color: #1e2d3d; }
 
-.detail-perks { display: flex; flex-direction: column; gap: 6px; font-size: 0.92rem; color: #3a8c6e; font-weight: 600; background: #eaf6f1; border-radius: 10px; padding: 12px 16px; }
+.detail-perks { display: flex; flex-direction: column; gap: 6px; font-size: 0.92rem; color: #1a56db; font-weight: 600; background: #e8f0fe; border-radius: 10px; padding: 12px 16px; }
 
 .wa-cta-btn {
   display: block; text-align: center;
