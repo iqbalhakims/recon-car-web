@@ -274,6 +274,7 @@ export default function CarsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(null);
+  const [expandedDents, setExpandedDents] = useState(null);
   const [editing, setEditing] = useState(null); // car id being edited
   const [editForm, setEditForm] = useState({});
 
@@ -397,7 +398,7 @@ export default function CarsPage() {
           <h2>Car Inventory ({cars.length})</h2>
           <div className="table-wrap"><table>
             <thead>
-              <tr><th>Model</th><th>Photos</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
+              <tr><th>Model</th><th>Photos</th><th>Dents</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
             </thead>
             <tbody>
               {cars.map(car => (
@@ -411,6 +412,15 @@ export default function CarsPage() {
                         style={{ whiteSpace: 'nowrap' }}
                       >
                         {expanded === car.id ? '▲ Hide' : '📷 Photos'}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => setExpandedDents(expandedDents === car.id ? null : car.id)}
+                        style={{ whiteSpace: 'nowrap' }}
+                      >
+                        {expandedDents === car.id ? '▲ Hide' : '🔧 Dents'}
                       </button>
                     </td>
                     <td>RM{car.price?.toLocaleString()}</td>
@@ -446,7 +456,7 @@ export default function CarsPage() {
                   </tr>
                   {editing === car.id && (
                     <tr>
-                      <td colSpan="8" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
+                      <td colSpan="9" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
                           <input placeholder="Model" value={editForm.model} onChange={e => setEditForm({ ...editForm, model: e.target.value })} style={{ flex: '2 1 180px' }} />
                           <input type="number" placeholder="Price" value={editForm.price} onChange={e => setEditForm({ ...editForm, price: e.target.value })} style={{ flex: '1 1 100px' }} />
@@ -461,19 +471,25 @@ export default function CarsPage() {
                   )}
                   {expanded === car.id && (
                     <tr>
-                      <td colSpan="8" style={{ background: '#fafafa', padding: '12px 16px' }}>
+                      <td colSpan="9" style={{ background: '#fafafa', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>📷 Photos</div>
                         <ImageGallery carId={car.id} />
-                        <div style={{ fontSize: '0.85rem', color: '#555', margin: '12px 0 6px' }}>🔧 Dents & Scratches</div>
-                        <DentGallery carId={car.id} />
                         <div style={{ fontSize: '0.85rem', color: '#555', margin: '12px 0 6px' }}>🎥 Videos</div>
                         <VideoGallery carId={car.id} />
                       </td>
                     </tr>
                   )}
+                  {expandedDents === car.id && (
+                    <tr>
+                      <td colSpan="9" style={{ background: '#fff8f0', padding: '12px 16px' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>🔧 Dents & Scratches</div>
+                        <DentGallery carId={car.id} />
+                      </td>
+                    </tr>
+                  )}
                 </React.Fragment>
               ))}
-              {cars.length === 0 && <tr><td colSpan="8" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
+              {cars.length === 0 && <tr><td colSpan="9" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
             </tbody>
           </table></div>
         </div>
