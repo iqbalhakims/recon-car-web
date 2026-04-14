@@ -9,7 +9,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
-  const [filters, setFilters] = useState({ make: '', minPrice: '', maxPrice: '', minYear: '', maxYear: '', maxMileage: '', condition: '' });
+  const [filters, setFilters] = useState({ make: '', model: '', minPrice: '', maxPrice: '', minYear: '', maxYear: '', maxMileage: '', condition: '' });
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
@@ -29,6 +29,11 @@ export default function HomePage() {
     return [...set].sort();
   }, [cars]);
 
+  const models = useMemo(() => {
+    const set = new Set(cars.map(c => c.model).filter(Boolean));
+    return [...set].sort();
+  }, [cars]);
+
   const conditions = useMemo(() => {
     const set = new Set(cars.map(c => c.condition).filter(Boolean));
     return [...set].sort();
@@ -38,6 +43,7 @@ export default function HomePage() {
     let result = cars.filter(c => {
       if (search && !c.model.toLowerCase().includes(search.toLowerCase())) return false;
       if (filters.make && !c.model.toLowerCase().startsWith(filters.make.toLowerCase())) return false;
+      if (filters.model && c.model !== filters.model) return false;
       if (filters.minPrice && c.price < Number(filters.minPrice)) return false;
       if (filters.maxPrice && c.price > Number(filters.maxPrice)) return false;
       if (filters.minYear && c.year < Number(filters.minYear)) return false;
@@ -64,7 +70,7 @@ export default function HomePage() {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
   const clearFilters = () => {
-    setFilters({ make: '', minPrice: '', maxPrice: '', minYear: '', maxYear: '', maxMileage: '', condition: '' });
+    setFilters({ make: '', model: '', minPrice: '', maxPrice: '', minYear: '', maxYear: '', maxMileage: '', condition: '' });
     setSearch('');
   };
 
@@ -106,9 +112,16 @@ export default function HomePage() {
             <div className="pub-filter-grid">
               <div className="pub-filter-field">
                 <label>Make</label>
-                <select value={filters.make} onChange={e => setFilters({ ...filters, make: e.target.value })}>
+                <select value={filters.make} onChange={e => setFilters({ ...filters, make: e.target.value, model: '' })}>
                   <option value="">All</option>
                   {makes.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div className="pub-filter-field">
+                <label>Model</label>
+                <select value={filters.model} onChange={e => setFilters({ ...filters, model: e.target.value })}>
+                  <option value="">All</option>
+                  {models.filter(m => !filters.make || m.toLowerCase().startsWith(filters.make.toLowerCase())).map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
               <div className="pub-filter-field">

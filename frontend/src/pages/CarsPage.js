@@ -277,6 +277,8 @@ export default function CarsPage() {
   const [expandedDents, setExpandedDents] = useState(null);
   const [editing, setEditing] = useState(null); // car id being edited
   const [editForm, setEditForm] = useState({});
+  const [modelSearch, setModelSearch] = useState('');
+  const filteredCars = cars.filter(c => c.model?.toLowerCase().includes(modelSearch.toLowerCase()));
 
   const fetchCars = async () => {
     const res = await fetch(API);
@@ -397,13 +399,21 @@ export default function CarsPage() {
         </div>
 
         <div className="card">
-          <h2>Car Inventory ({cars.length})</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+            <h2 style={{ margin: 0 }}>Car Inventory ({filteredCars.length}{filteredCars.length !== cars.length ? ` of ${cars.length}` : ''})</h2>
+            <input
+              placeholder="🔍 Filter by model..."
+              value={modelSearch}
+              onChange={e => setModelSearch(e.target.value)}
+              style={{ padding: '7px 14px', border: '1px solid #ddd', borderRadius: 20, fontSize: '0.9rem', outline: 'none', minWidth: 200 }}
+            />
+          </div>
           <div className="table-wrap"><table>
             <thead>
               <tr><th>Ref</th><th>Model</th><th>Photos</th><th>Dents</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
             </thead>
             <tbody>
-              {cars.map(car => (
+              {filteredCars.map(car => (
                 <React.Fragment key={car.id}>
                   <tr>
                     <td style={{ color: '#888', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{car.ref_no || '—'}</td>
