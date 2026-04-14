@@ -89,14 +89,16 @@ function CarCard({ car, onClick }) {
   }, [car.id]);
 
   const monthly = estimateMonthly(car.price);
+  const isNew = car.year >= 2024;
 
   return (
-    <div className="pub-card" onClick={onClick}>
+    <div className={`pub-card${isNew ? ' pub-card--new' : ''}`} onClick={onClick}>
       <div className="pub-card-img">
         {thumb
           ? <img src={`/uploads/${thumb}`} alt={car.model} />
           : <div className="pub-card-img-placeholder">🚗</div>
         }
+        {isNew && <span className="new-car-badge">NEW</span>}
       </div>
       <div className="pub-card-body">
         {monthly && <p className="pub-card-monthly">est. RM {monthly.toLocaleString()}/mo</p>}
