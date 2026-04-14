@@ -12,12 +12,12 @@ const carController = {
 
   async create(req, res) {
     try {
-      const { model, price, condition, year, grade } = req.body;
+      const { model, price, condition, year, grade, ref_no } = req.body;
       const mileage = req.body.mileage !== '' ? req.body.mileage : null;
       if (!model || !price) {
         return res.status(400).json({ success: false, message: 'model and price are required' });
       }
-      const id = await CarModel.create({ model, price, mileage: mileage || null, condition: condition || null, year: year || null, grade: grade || null });
+      const id = await CarModel.create({ model, price, mileage: mileage || null, condition: condition || null, year: year || null, grade: grade || null, ref_no: ref_no || null });
       const car = await CarModel.getById(id);
       res.status(201).json({ success: true, data: car });
     } catch (err) {
@@ -28,11 +28,11 @@ const carController = {
   async update(req, res) {
     try {
       const { id } = req.params;
-      const { model, price, mileage, condition, year, grade } = req.body;
+      const { model, price, mileage, condition, year, grade, ref_no } = req.body;
       if (!model || !price) {
         return res.status(400).json({ success: false, message: 'model and price are required' });
       }
-      const affected = await CarModel.update(id, { model, price, mileage, condition, year, grade });
+      const affected = await CarModel.update(id, { model, price, mileage, condition, year, grade, ref_no });
       if (!affected) {
         return res.status(404).json({ success: false, message: 'Car not found' });
       }

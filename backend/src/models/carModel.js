@@ -10,13 +10,6 @@ async function migrate() {
   if (!existing.includes('year'))   await pool.query("ALTER TABLE cars ADD COLUMN year INT AFTER `condition`");
   if (!existing.includes('grade'))  await pool.query("ALTER TABLE cars ADD COLUMN grade VARCHAR(50) AFTER year");
   if (!existing.includes('ref_no')) await pool.query("ALTER TABLE cars ADD COLUMN ref_no VARCHAR(10) UNIQUE AFTER id");
-
-  // Backfill ref_no for existing cars that don't have one
-  const [missing] = await pool.query("SELECT id FROM cars WHERE ref_no IS NULL OR ref_no = ''");
-  for (const row of missing) {
-    const ref = `REF-${String(row.id).padStart(4, '0')}`;
-    await pool.query("UPDATE cars SET ref_no = ? WHERE id = ?", [ref, row.id]);
-  }
 }
 migrate().catch(err => console.error('Migration error:', err.message));
 
@@ -31,21 +24,18 @@ const CarModel = {
     return rows[0];
   },
 
-  async create({ model, price, mileage, condition, year, grade }) {
+  async create({ model, price, mileage, condition, year, grade, ref_no }) {
     const [result] = await pool.query(
-      'INSERT INTO cars (model, price, mileage, `condition`, year, grade) VALUES (?, ?, ?, ?, ?, ?)',
-      [model, price, mileage, condition, year || null, grade || null]
+      'INSERT INTO cars (model, price, mileage, `condition`, year, grade, ref_no) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [model, price, mileage, condition, year || null, grade || null, ref_no || null]
     );
-    const insertId = result.insertId;
-    const ref_no = `REF-${String(insertId).padStart(4, '0')}`;
-    await pool.query('UPDATE cars SET ref_no = ? WHERE id = ?', [ref_no, insertId]);
-    return insertId;
+    return result.insertId;
   },
 
-  async update(id, { model, price, mileage, condition, year, grade }) {
+  async update(id, { model, price, mileage, condition, year, grade, ref_no }) {
     const [result] = await pool.query(
-      'UPDATE cars SET model=?, price=?, mileage=?, `condition`=?, year=?, grade=? WHERE id=?',
-      [model, price, mileage || null, condition || null, year || null, grade || null, id]
+      'UPDATE cars SET model=?, price=?, mileage=?, `condition`=?, year=?, grade=?, ref_no=? WHERE id=?',
+      [model, price, mileage || null, condition || null, year || null, grade || null, ref_no || null, id]
     );
     return result.affectedRows;
   },

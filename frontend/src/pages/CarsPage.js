@@ -269,7 +269,7 @@ function VideoGallery({ carId }) {
 
 export default function CarsPage() {
   const [cars, setCars] = useState([]);
-  const [form, setForm] = useState({ model: '', price: '', mileage: '', condition: '', year: '', grade: '' });
+  const [form, setForm] = useState({ ref_no: '', model: '', price: '', mileage: '', condition: '', year: '', grade: '' });
   const [photos, setPhotos] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -306,7 +306,7 @@ export default function CarsPage() {
           await fetch(`${API}/${carId}/images`, { method: 'POST', body: fd });
         }
       }
-      setForm({ model: '', price: '', mileage: '', condition: '', year: '', grade: '' });
+      setForm({ ref_no: '', model: '', price: '', mileage: '', condition: '', year: '', grade: '' });
       setPhotos([]);
       fetchCars();
     } else {
@@ -332,7 +332,7 @@ export default function CarsPage() {
 
   const startEdit = (car) => {
     setEditing(car.id);
-    setEditForm({ model: car.model || '', price: car.price || '', mileage: car.mileage || '', condition: car.condition || '', year: car.year || '', grade: car.grade || '' });
+    setEditForm({ ref_no: car.ref_no || '', model: car.model || '', price: car.price || '', mileage: car.mileage || '', condition: car.condition || '', year: car.year || '', grade: car.grade || '' });
   };
 
   const cancelEdit = () => { setEditing(null); setEditForm({}); };
@@ -361,6 +361,8 @@ export default function CarsPage() {
           <h2>Add Car</h2>
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleSubmit}>
+            <input placeholder="Ref No (e.g. 1234)" required
+              value={form.ref_no} onChange={e => setForm({ ...form, ref_no: e.target.value })} />
             <input placeholder="Model (e.g. Toyota Vios 2020)" required
               value={form.model} onChange={e => setForm({ ...form, model: e.target.value })} />
             <input type="number" placeholder="Price (RM)" required
@@ -459,6 +461,7 @@ export default function CarsPage() {
                     <tr>
                       <td colSpan="9" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
+                          <input placeholder="Ref No" value={editForm.ref_no} onChange={e => setEditForm({ ...editForm, ref_no: e.target.value })} style={{ flex: '1 1 90px' }} />
                           <input placeholder="Model" value={editForm.model} onChange={e => setEditForm({ ...editForm, model: e.target.value })} style={{ flex: '2 1 180px' }} />
                           <input type="number" placeholder="Price" value={editForm.price} onChange={e => setEditForm({ ...editForm, price: e.target.value })} style={{ flex: '1 1 100px' }} />
                           <input type="number" placeholder="Mileage" value={editForm.mileage} onChange={e => setEditForm({ ...editForm, mileage: e.target.value })} style={{ flex: '1 1 100px' }} />
