@@ -112,6 +112,14 @@
 }
 .wa-cta-btn:hover { background: #4a90b8; }
 
+/* Dents & Scratches */
+.dent-section { margin-top: 32px; }
+.dent-title { font-size: 1rem; font-weight: 700; color: #1e2d3d; margin: 0 0 12px; }
+.dent-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.dent-item { background: #fff8f0; border: 1px solid #f0d9c0; border-radius: 10px; padding: 10px; max-width: 150px; }
+.dent-img { width: 130px; height: 100px; object-fit: cover; border-radius: 6px; display: block; }
+.dent-note { font-size: 0.78rem; color: #a06030; margin: 6px 0 0; }
+
 /* Loan Calculator section */
 .calc-section {
   margin-top: 32px;

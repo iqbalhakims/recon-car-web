@@ -114,6 +114,85 @@ function ImageGallery({ carId }) {
   );
 }
 
+function DentGallery({ carId }) {
+  const [dents, setDents] = useState([]);
+  const [note, setNote] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef();
+
+  const fetchDents = async () => {
+    const res = await fetch(`${API}/${carId}/dents`);
+    const data = await res.json();
+    if (data.success) setDents(data.data);
+  };
+
+  useEffect(() => { fetchDents(); }, [carId]);
+
+  const handleSubmit = async () => {
+    const file = fileRef.current.files[0];
+    if (!file && !note.trim()) return;
+    setUploading(true);
+    const fd = new FormData();
+    if (file) {
+      const resized = await resizeImage(file);
+      fd.append('image', resized);
+    }
+    fd.append('note', note);
+    await fetch(`${API}/${carId}/dents`, { method: 'POST', body: fd });
+    setNote('');
+    fileRef.current.value = '';
+    await fetchDents();
+    setUploading(false);
+  };
+
+  const handleDelete = async (dentId) => {
+    if (!window.confirm('Delete this dent/scratch?')) return;
+    await fetch(`${API}/${carId}/dents/${dentId}`, { method: 'DELETE' });
+    fetchDents();
+  };
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+        <input
+          placeholder="Note (e.g. bumper scratch)"
+          value={note}
+          onChange={e => setNote(e.target.value)}
+          style={{ flex: 1, minWidth: 140, padding: '5px 8px', borderRadius: 6, border: '1px solid #ddd', fontSize: '0.85rem' }}
+        />
+        <label style={{
+          border: '2px dashed #ccc', borderRadius: 6, padding: '5px 10px',
+          cursor: 'pointer', color: '#aaa', fontSize: '0.82rem', display: 'flex', alignItems: 'center',
+        }}>
+          📷 Photo
+          <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }} />
+        </label>
+        <button className="btn btn-sm btn-secondary" onClick={handleSubmit} disabled={uploading}>
+          {uploading ? '...' : '+ Add'}
+        </button>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {dents.map(d => (
+          <div key={d.id} style={{ position: 'relative', background: '#fff8f0', border: '1px solid #f0d9c0', borderRadius: 8, padding: 6, maxWidth: 120 }}>
+            {d.filename && (
+              <img src={`/uploads/${d.filename}`} alt="dent"
+                style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 4, display: 'block', marginBottom: 4 }} />
+            )}
+            {d.note && <div style={{ fontSize: '0.72rem', color: '#a06030' }}>{d.note}</div>}
+            <button onClick={() => handleDelete(d.id)} style={{
+              position: 'absolute', top: -6, right: -6,
+              background: '#e94560', color: 'white', border: 'none',
+              borderRadius: '50%', width: 18, height: 18, fontSize: 10,
+              cursor: 'pointer', lineHeight: '18px', textAlign: 'center', padding: 0,
+            }}>✕</button>
+          </div>
+        ))}
+        {dents.length === 0 && <span style={{ fontSize: '0.8rem', color: '#bbb' }}>No dents recorded</span>}
+      </div>
+    </div>
+  );
+}
+
 function VideoGallery({ carId }) {
   const [videos, setVideos] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -385,6 +464,8 @@ export default function CarsPage() {
                       <td colSpan="8" style={{ background: '#fafafa', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>📷 Photos</div>
                         <ImageGallery carId={car.id} />
+                        <div style={{ fontSize: '0.85rem', color: '#555', margin: '12px 0 6px' }}>🔧 Dents & Scratches</div>
+                        <DentGallery carId={car.id} />
                         <div style={{ fontSize: '0.85rem', color: '#555', margin: '12px 0 6px' }}>🎥 Videos</div>
                         <VideoGallery carId={car.id} />
                       </td>

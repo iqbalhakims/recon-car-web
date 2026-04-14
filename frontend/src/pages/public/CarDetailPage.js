@@ -106,6 +106,7 @@ export default function CarDetailPage() {
   const navigate = useNavigate();
   const [car, setCar] = useState(null);
   const [images, setImages] = useState([]);
+  const [dents, setDents] = useState([]);
   const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState(false);
@@ -114,12 +115,14 @@ export default function CarDetailPage() {
     Promise.all([
       fetch(`/api/cars`).then(r => r.json()),
       fetch(`/api/cars/${id}/images`).then(r => r.json()),
-    ]).then(([carsData, imagesData]) => {
+      fetch(`/api/cars/${id}/dents`).then(r => r.json()),
+    ]).then(([carsData, imagesData, dentsData]) => {
       if (carsData.success) {
         const found = carsData.data.find(c => c.id === parseInt(id));
         setCar(found || null);
       }
       if (imagesData.success) setImages(imagesData.data);
+      if (dentsData.success) setDents(dentsData.data);
       setLoading(false);
     });
   }, [id]);
@@ -229,6 +232,21 @@ export default function CarDetailPage() {
             </a>
           </div>
         </div>
+
+        {/* Dents & Scratches */}
+        {dents.length > 0 && (
+          <div className="dent-section">
+            <h3 className="dent-title">🔧 Dents & Scratches</h3>
+            <div className="dent-grid">
+              {dents.map(d => (
+                <div key={d.id} className="dent-item">
+                  {d.filename && <img src={`/uploads/${d.filename}`} alt="dent" className="dent-img" />}
+                  {d.note && <p className="dent-note">{d.note}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Loan Calculator — full width below */}
         <div className="calc-section">
