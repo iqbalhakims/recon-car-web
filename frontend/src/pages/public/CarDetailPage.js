@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './public.css';
 
-function LoanCalculator({ carPrice }) {
+function LoanCalculator({ carPrice, carModel, carYear, carRef }) {
   const [dp, setDp] = useState(Math.round(carPrice * 0.1));
   const [tenure, setTenure] = useState(7);
   const [ncd, setNcd] = useState(0);
@@ -18,7 +18,11 @@ function LoanCalculator({ carPrice }) {
   const insuranceAfterNcd = baseInsurance * (1 - ncd / 100);
 
   const waMsg = encodeURIComponent(
-    `Hi, I'm interested in this car (RM${carPrice?.toLocaleString()}). Based on my calculation:\n` +
+    `Hi, I'm interested in this car:\n` +
+    `- Model: ${carModel}${carYear ? ` (${carYear})` : ''}\n` +
+    `- Ref: ${carRef}\n` +
+    `- Price: RM${carPrice?.toLocaleString()}\n\n` +
+    `Based on my calculation:\n` +
     `- Down payment: RM${dp.toLocaleString()}\n` +
     `- Tenure: ${tenure} years\n` +
     `- Monthly installment: RM${Math.ceil(monthly).toLocaleString()}\n` +
@@ -250,7 +254,13 @@ export default function CarDetailPage() {
 
         {/* Loan Calculator — full width below */}
         <div className="calc-section">
-          <LoanCalculator key={car.id} carPrice={car.price || 0} />
+          <LoanCalculator
+            key={car.id}
+            carPrice={car.price || 0}
+            carModel={car.model}
+            carYear={car.year}
+            carRef={`REF-${String(car.id).padStart(4, '0')}`}
+          />
         </div>
       </main>
     </div>
