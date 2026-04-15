@@ -6,7 +6,7 @@ function LoanCalculator({ carPrice, carModel, carYear, carRef }) {
   const [dp, setDp] = useState(Math.round(carPrice * 0.1));
   const [tenure, setTenure] = useState(7);
   const [ncd, setNcd] = useState(0);
-  const [rate] = useState(3.5);
+  const [rate] = useState(2.6);
 
   const loanAmount = Math.max(0, carPrice - dp);
   const totalInterest = loanAmount * (rate / 100) * tenure;

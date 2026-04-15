@@ -214,7 +214,7 @@ export default function HomePage() {
 function estimateMonthly(price) {
   if (!price) return null;
   const loan = price * 0.9;
-  const total = loan + loan * 0.035 * 7;
+  const total = loan + loan * 0.026 * 7;
   return Math.ceil(total / (7 * 12));
 }
 
