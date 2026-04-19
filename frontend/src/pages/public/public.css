@@ -207,7 +207,8 @@
 .about-map { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
 
 /* Footer */
-.pub-footer { text-align: center; padding: 40px 16px; color: #888; font-size: 0.9rem; }
+.pub-footer { text-align: center; padding: 40px 16px 24px; color: #888; font-size: 0.9rem; }
+.pub-footer-copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 0.78rem; color: #bbb; }
 .wa-float-btn {
   display: inline-block; margin-top: 12px;
   background: #25d366; color: white;

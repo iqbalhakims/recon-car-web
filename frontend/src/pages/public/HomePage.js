@@ -284,6 +284,9 @@ export default function HomePage() {
         >
           💬 WhatsApp Us
         </a>
+        <div className="pub-footer-copy">
+          © {new Date().getFullYear()} {ABOUT.name}. All rights reserved.
+        </div>
       </footer>
     </div>
   );
