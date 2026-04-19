@@ -274,15 +274,6 @@ export default function HomePage() {
       </section>
 
       <footer className="pub-footer">
-        <p>Interested? Chat with us directly on WhatsApp 👇</p>
-        <a
-          href="https://wa.me/60134107845?text=Hi%2C%20I%27m%20interested%20in%20one%20of%20your%20cars"
-          target="_blank"
-          rel="noreferrer"
-          className="wa-float-btn"
-        >
-          💬 WhatsApp Us
-        </a>
         <div className="pub-footer-copy">
           © {new Date().getFullYear()} {ABOUT.name}. All rights reserved.
         </div>
