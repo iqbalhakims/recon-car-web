@@ -350,6 +350,20 @@ export default function CarsPage() {
     else alert(data.message);
   };
 
+  const shareOnWhatsApp = (car) => {
+    const lines = [
+      `🚗 *${car.model}*`,
+      car.ref_no ? `Ref: ${car.ref_no}` : null,
+      car.year ? `Year: ${car.year}` : null,
+      car.mileage ? `Mileage: ${car.mileage.toLocaleString()} km` : null,
+      car.condition ? `Condition: ${car.condition}` : null,
+      car.grade ? `Grade: ${car.grade}` : null,
+      `Price: RM${car.price?.toLocaleString()}`,
+      `Status: ${car.status}`,
+    ].filter(Boolean).join('\n');
+    window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, '_blank');
+  };
+
   const statusClass = (s) => {
     if (s === 'available') return 'badge badge-available';
     if (s === 'sold') return 'badge badge-sold';
@@ -460,6 +474,15 @@ export default function CarsPage() {
                     <td>
                       <button
                         className="btn btn-sm"
+                        onClick={() => shareOnWhatsApp(car)}
+                        style={{ background: '#e6f9ee', color: '#25d366', whiteSpace: 'nowrap' }}
+                      >
+                        📲 Share
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm"
                         onClick={() => deleteCar(car.id, car.model)}
                         style={{ background: '#fde8ec', color: '#c0392b', whiteSpace: 'nowrap' }}
                       >
@@ -469,7 +492,7 @@ export default function CarsPage() {
                   </tr>
                   {editing === car.id && (
                     <tr>
-                      <td colSpan="9" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
+                      <td colSpan="10" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
                           <input placeholder="Ref No" value={editForm.ref_no} onChange={e => setEditForm({ ...editForm, ref_no: e.target.value })} style={{ flex: '1 1 90px' }} />
                           <input placeholder="Model" value={editForm.model} onChange={e => setEditForm({ ...editForm, model: e.target.value })} style={{ flex: '2 1 180px' }} />
@@ -485,7 +508,7 @@ export default function CarsPage() {
                   )}
                   {expanded === car.id && (
                     <tr>
-                      <td colSpan="9" style={{ background: '#fafafa', padding: '12px 16px' }}>
+                      <td colSpan="10" style={{ background: '#fafafa', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>📷 Photos</div>
                         <ImageGallery carId={car.id} />
                         <div style={{ fontSize: '0.85rem', color: '#555', margin: '12px 0 6px' }}>🎥 Videos</div>
@@ -495,7 +518,7 @@ export default function CarsPage() {
                   )}
                   {expandedDents === car.id && (
                     <tr>
-                      <td colSpan="9" style={{ background: '#fff8f0', padding: '12px 16px' }}>
+                      <td colSpan="10" style={{ background: '#fff8f0', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>🔧 Dents & Scratches</div>
                         <DentGallery carId={car.id} />
                       </td>
@@ -503,7 +526,7 @@ export default function CarsPage() {
                   )}
                 </React.Fragment>
               ))}
-              {cars.length === 0 && <tr><td colSpan="9" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
+              {cars.length === 0 && <tr><td colSpan="10" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
             </tbody>
           </table></div>
         </div>
