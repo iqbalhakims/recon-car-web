@@ -4,7 +4,7 @@ import './public.css';
 
 const ABOUT = {
   name: 'Edaran Idaman Suri Sdn Bhd',
-  description: 'Your trusted used car dealer in Alor Star, Kedah. We offer quality pre-owned vehicles with full loan arrangement, low deposit, and transparent pricing — serving buyers across Peninsular Malaysia.',
+  description: 'Your trusted used car dealer in Alor Star, Kedah. We offer quality selling record cars with full loan arrangement, low deposit, and transparent pricing — serving buyers across Peninsular Malaysia.',
   location: 'Alor Star, Kedah, Malaysia',
   phone: '0134107845',
   mapSrc: 'https://maps.google.com/maps?q=39X6%2B6W+Alor+Setar,+Kedah&output=embed',
