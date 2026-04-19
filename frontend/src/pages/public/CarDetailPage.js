@@ -230,6 +230,22 @@ export default function CarDetailPage() {
               <span>✅ Viewing available</span>
             </div>
 
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(
+                `🚗 Check out this car!\n\n` +
+                `*${car.model}*${car.year ? ` (${car.year})` : ''}\n` +
+                `💰 RM${car.price?.toLocaleString()}\n` +
+                (car.mileage ? `🛣 ${car.mileage.toLocaleString()} km\n` : '') +
+                (car.condition ? `⚙️ ${car.condition}\n` : '') +
+                `\n${window.location.href}`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="wa-share-btn"
+            >
+              📲 Share this car
+            </a>
+
           </div>
         </div>
 

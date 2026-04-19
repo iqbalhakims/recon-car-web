@@ -174,6 +174,17 @@
 }
 .wa-cta-btn:hover { background: #2e7058; }
 
+.wa-share-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #25d366; color: white;
+  padding: 12px; border-radius: 12px; margin-top: 14px;
+  font-weight: 700; font-size: 1rem;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(37,211,102,0.3);
+  transition: background 0.2s;
+}
+.wa-share-btn:hover { background: #1ebe5d; }
+
 /* Dents & Scratches */
 .dent-section { margin-top: 32px; }
 .dent-title { font-size: 1rem; font-weight: 700; color: #1e2d3d; margin: 0 0 12px; }
