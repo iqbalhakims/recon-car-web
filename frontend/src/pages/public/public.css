@@ -19,39 +19,83 @@
 }
 .admin-btn:hover { background: #e94560; border-color: #e94560; color: white; }
 
+/* Hero banner — animations */
+@keyframes hero-bg-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(91,164,207,0.5); }
+  50%       { box-shadow: 0 0 0 8px rgba(91,164,207,0); }
+}
+
 /* Hero banner */
 .pub-hero {
-  background: linear-gradient(135deg, #1e2d3d 0%, #2a4a6b 60%, #5ba4cf 100%);
-  padding: 40px 16px;
+  background: linear-gradient(135deg, #1e2d3d, #2a4a6b, #1a6fa8, #1e2d3d);
+  background-size: 300% 300%;
+  animation: hero-bg-shift 8s ease infinite;
+  padding: 52px 16px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
-.pub-hero-inner { max-width: 600px; margin: 0 auto; }
+.pub-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 60% 50%, rgba(91,164,207,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.pub-hero-inner {
+  max-width: 600px; margin: 0 auto; position: relative;
+  animation: hero-fade-up 0.7s ease both;
+}
 .pub-hero-badge {
   display: inline-block;
   background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.25);
-  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(91,164,207,0.6);
+  color: rgba(255,255,255,0.9);
   font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em;
-  padding: 4px 14px; border-radius: 20px; margin-bottom: 14px;
+  padding: 4px 14px; border-radius: 20px; margin-bottom: 16px;
+  animation: badge-pulse 2.5s ease-in-out infinite;
 }
 .pub-hero-title {
-  color: white; font-size: 2.4rem; font-weight: 900;
-  margin: 0 0 8px; line-height: 1.1;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  font-size: 2.6rem; font-weight: 900;
+  margin: 0 0 10px; line-height: 1.1;
+  background: linear-gradient(90deg, #fff 20%, #a8d8f0 40%, #fff 60%, #a8d8f0 80%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3.5s linear infinite;
+  filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4));
 }
-@media (max-width: 480px) { .pub-hero-title { font-size: 1.8rem; } }
+@media (max-width: 480px) { .pub-hero-title { font-size: 2rem; } }
 .pub-hero-sub {
-  color: rgba(255,255,255,0.75); font-size: 1.05rem;
-  margin: 0 0 24px; letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.72); font-size: 1.05rem;
+  margin: 0 0 26px; letter-spacing: 0.03em;
 }
 .pub-hero-perks {
   display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
 }
 .pub-hero-perks span {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.2);
   color: white; font-size: 0.82rem; font-weight: 600;
   padding: 6px 16px; border-radius: 20px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.pub-hero-perks span:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.4);
 }
 
 /* Main */
