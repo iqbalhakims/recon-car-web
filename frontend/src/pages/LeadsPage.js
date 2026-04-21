@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { usePerms } from '../PermContext';
 
 const API_LEADS = '/api/leads';
 const API_CARS = '/api/cars';
 const API_APPOINTMENTS = '/api/appointments';
 
 export default function LeadsPage() {
+  const { perms } = usePerms();
   const [leads, setLeads] = useState([]);
   const [cars, setCars] = useState([]);
   const [form, setForm] = useState({ name: '', phone: '', car_id: '', next_follow_up_date: '' });
@@ -114,8 +116,8 @@ export default function LeadsPage() {
 
   return (
     <div style={{ marginTop: 20 }}>
-      <div className="grid-2">
-        <div className="card">
+      <div className={perms.create ? 'grid-2' : ''}>
+        {perms.create && <div className="card">
           <h2>Add Lead</h2>
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleSubmit}>
@@ -134,7 +136,7 @@ export default function LeadsPage() {
               onChange={e => setForm({ ...form, next_follow_up_date: e.target.value })} />
             <button type="submit" className="btn btn-primary">Add Lead</button>
           </form>
-        </div>
+        </div>}
 
         <div className="card">
           <h2>Leads ({leads.length})</h2>
@@ -150,19 +152,23 @@ export default function LeadsPage() {
                   <td>{lead.car_model || '—'}</td>
                   <td>{lead.next_follow_up_date ? new Date(lead.next_follow_up_date).toLocaleDateString() : '—'}</td>
                   <td>
-                    <select className="btn btn-sm btn-secondary"
-                      value={lead.status}
-                      onChange={e => updateLead(lead.id, e.target.value)}>
-                      <option value="new">New</option>
-                      <option value="contacted">Contacted</option>
-                      <option value="closed">Closed</option>
-                    </select>
+                    {perms.edit ? (
+                      <select className="btn btn-sm btn-secondary"
+                        value={lead.status}
+                        onChange={e => updateLead(lead.id, e.target.value)}>
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    ) : <span className={`badge badge-${lead.status}`}>{lead.status}</span>}
                   </td>
-                  <td>
-                    <button className="btn btn-sm btn-primary" onClick={() => openAppointments(lead)}>
-                      Set Appt
-                    </button>
-                  </td>
+                  {perms.create && (
+                    <td>
+                      <button className="btn btn-sm btn-primary" onClick={() => openAppointments(lead)}>
+                        Set Appt
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
               {leads.length === 0 && <tr><td colSpan="6" style={{textAlign:'center',color:'#aaa'}}>No leads yet</td></tr>}

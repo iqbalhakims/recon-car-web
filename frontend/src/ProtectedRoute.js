@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getToken, clearToken } from './auth';
+import { PermContext } from './PermContext';
 
 export default function ProtectedRoute({ children }) {
-  const [status, setStatus] = useState('checking'); // checking | ok | denied
+  const [status, setStatus] = useState('checking');
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     const token = getToken();
     if (!token) { setStatus('denied'); return; }
 
-    fetch('/api/auth/verify', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch('/api/auth/verify', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => setStatus(d.success ? 'ok' : 'denied'))
+      .then(d => {
+        if (d.success) {
+          setSession({ role: d.role, perms: d.perms });
+          setStatus('ok');
+        } else {
+          setStatus('denied');
+        }
+      })
       .catch(() => setStatus('denied'));
   }, []);
 
@@ -30,5 +37,9 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/admin/login" replace />;
   }
 
-  return children;
+  return (
+    <PermContext.Provider value={session}>
+      {children}
+    </PermContext.Provider>
+  );
 }

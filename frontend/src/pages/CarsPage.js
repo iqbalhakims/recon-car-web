@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'; // React needed for React.Fragment
+import { usePerms } from '../PermContext';
 
 const API = '/api/cars';
 
@@ -281,6 +282,7 @@ function VideoGallery({ carId }) {
 }
 
 export default function CarsPage() {
+  const { perms } = usePerms();
   const [cars, setCars] = useState([]);
   const [form, setForm] = useState({ ref_no: '', model: '', price: '', mileage: '', condition: '', year: '', grade: '' });
   const [photos, setPhotos] = useState([]);
@@ -386,8 +388,8 @@ export default function CarsPage() {
 
   return (
     <div style={{ marginTop: 20 }}>
-      <div className="grid-2">
-        <div className="card">
+      <div className={perms.create ? 'grid-2' : ''}>
+        {perms.create && <div className="card">
           <h2>Add Car</h2>
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleSubmit}>
@@ -424,7 +426,7 @@ export default function CarsPage() {
               {submitting ? 'Adding...' : 'Add Car'}
             </button>
           </form>
-        </div>
+        </div>}
 
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
@@ -476,24 +478,28 @@ export default function CarsPage() {
                     <td>RM{car.price?.toLocaleString()}</td>
                     <td>{car.mileage?.toLocaleString()} km</td>
                     <td><span className={statusClass(car.status)}>{car.status}</span></td>
-                    <td>
-                      <select className="btn btn-sm btn-secondary"
-                        value={car.status}
-                        onChange={e => updateStatus(car.id, e.target.value)}>
-                        <option value="available">Available</option>
-                        <option value="reserved">Reserved</option>
-                        <option value="sold">Sold</option>
-                      </select>
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-sm"
-                        onClick={() => editing === car.id ? cancelEdit() : startEdit(car)}
-                        style={{ background: '#e8f0fe', color: '#1a56db', whiteSpace: 'nowrap' }}
-                      >
-                        {editing === car.id ? '✕ Cancel' : '✏️ Edit'}
-                      </button>
-                    </td>
+                    {perms.edit ? (
+                      <td>
+                        <select className="btn btn-sm btn-secondary"
+                          value={car.status}
+                          onChange={e => updateStatus(car.id, e.target.value)}>
+                          <option value="available">Available</option>
+                          <option value="reserved">Reserved</option>
+                          <option value="sold">Sold</option>
+                        </select>
+                      </td>
+                    ) : <td />}
+                    {perms.edit ? (
+                      <td>
+                        <button
+                          className="btn btn-sm"
+                          onClick={() => editing === car.id ? cancelEdit() : startEdit(car)}
+                          style={{ background: '#e8f0fe', color: '#1a56db', whiteSpace: 'nowrap' }}
+                        >
+                          {editing === car.id ? '✕ Cancel' : '✏️ Edit'}
+                        </button>
+                      </td>
+                    ) : <td />}
                     <td>
                       <button
                         className="btn btn-sm"
@@ -503,15 +509,17 @@ export default function CarsPage() {
                         📲 Share
                       </button>
                     </td>
-                    <td>
-                      <button
-                        className="btn btn-sm"
-                        onClick={() => deleteCar(car.id, car.model)}
-                        style={{ background: '#fde8ec', color: '#c0392b', whiteSpace: 'nowrap' }}
-                      >
-                        🗑 Delete
-                      </button>
-                    </td>
+                    {perms.delete ? (
+                      <td>
+                        <button
+                          className="btn btn-sm"
+                          onClick={() => deleteCar(car.id, car.model)}
+                          style={{ background: '#fde8ec', color: '#c0392b', whiteSpace: 'nowrap' }}
+                        >
+                          🗑 Delete
+                        </button>
+                      </td>
+                    ) : <td />}
                   </tr>
                   {editing === car.id && (
                     <tr>

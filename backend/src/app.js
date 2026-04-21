@@ -10,6 +10,8 @@ const authRoutes = require('./routes/authRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const systemRoutes = require('./routes/systemRoutes');
+const userRoutes = require('./routes/userRoutes');
+const { seedAdmin } = require('./controllers/authController');
 
 const pool = require('./config/database');
 const requestMetrics = require('./middleware/requestMetrics');
@@ -43,12 +45,14 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/cars/:id/videos', videoRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/system', systemRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Car Sales CRM API is running' });
 });
 
 waitForDb()
+  .then(() => seedAdmin())
   .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
   .catch(err => { console.error('Could not connect to DB:', err.message); process.exit(1); });
 
