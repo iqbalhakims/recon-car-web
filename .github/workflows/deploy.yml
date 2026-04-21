@@ -51,6 +51,7 @@ jobs:
           image-ref: ghcr.io/${{ github.repository_owner }}/salesme-frontend:latest
           format: table
           exit-code: 1
+          scanners: vuln,secret
           severity: CRITICAL,HIGH
           ignore-unfixed: true
 
@@ -60,6 +61,7 @@ jobs:
           image-ref: ghcr.io/${{ github.repository_owner }}/salesme-backend:latest
           format: table
           exit-code: 1
+          scanners: vuln,secret
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           skip-dirs: /usr/local/lib/node_modules,/opt/yarn-v1.22.22
