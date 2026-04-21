@@ -50,7 +50,7 @@ jobs:
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/salesme-frontend:latest
           format: table
-          exit-code: 0
+          exit-code: 1
           severity: CRITICAL,HIGH
           ignore-unfixed: true
 
@@ -59,9 +59,10 @@ jobs:
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/salesme-backend:latest
           format: table
-          exit-code: 0
+          exit-code: 1
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          trivyignores: ./backend/.trivyignore
 
   deploy:
     needs: build-and-push
