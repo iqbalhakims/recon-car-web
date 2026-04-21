@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { authFetch } from '../auth';
 
 const PERMS = [
-  { key: 'perm_view',   label: 'View',   desc: 'Can browse all data' },
-  { key: 'perm_create', label: 'Create', desc: 'Can add cars & leads' },
-  { key: 'perm_edit',   label: 'Edit',   desc: 'Can edit & change status' },
-  { key: 'perm_delete', label: 'Delete', desc: 'Can delete records' },
+  { key: 'perm_view',   label: 'Read',   color: '#10b981', desc: 'Log in & view all admin data' },
+  { key: 'perm_create', label: 'Create', color: '#3b82f6', desc: 'Add cars, leads & appointments' },
+  { key: 'perm_edit',   label: 'Edit',   color: '#f59e0b', desc: 'Edit records & change status' },
+  { key: 'perm_delete', label: 'Delete', color: '#ef4444', desc: 'Delete any record' },
 ];
 
 const EMPTY_FORM = { username: '', password: '', perm_view: true, perm_create: false, perm_edit: false, perm_delete: false };
@@ -88,11 +88,21 @@ export default function UsersPage() {
 
   return (
     <div style={{ marginTop: 20 }}>
+
+      {/* Context banner */}
+      <div style={{
+        background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8,
+        padding: '10px 16px', marginBottom: 16, fontSize: '0.88rem', color: '#1e40af',
+      }}>
+        <strong>Admin Panel Access Only</strong> — these users log in at <code>/admin/login</code> to manage the CRM.
+        The public customer site (<code>/</code>) is always open with no login required.
+      </div>
+
       <div className="grid-2">
 
         {/* ── Create User ── */}
         <div className="card">
-          <h2>Create User</h2>
+          <h2>Create Staff User</h2>
           {error   && <div className="alert alert-error">{error}</div>}
           {success && <div className="alert alert-success">{success}</div>}
           <form onSubmit={handleCreate}>
@@ -110,33 +120,40 @@ export default function UsersPage() {
               onChange={e => setForm({ ...form, password: e.target.value })}
             />
 
-            <div style={{ marginTop: 4 }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#555', marginBottom: 8 }}>Permissions</div>
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#555', marginBottom: 8 }}>
+                Admin Panel Permissions
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {PERMS.map(p => (
                   <label key={p.key} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '8px 10px', borderRadius: 6,
-                    border: `2px solid ${form[p.key] ? '#3b82f6' : '#e5e7eb'}`,
-                    background: form[p.key] ? '#eff6ff' : '#fafafa',
+                    padding: '10px 12px', borderRadius: 8,
+                    border: `2px solid ${form[p.key] ? p.color : '#e5e7eb'}`,
+                    background: form[p.key] ? `${p.color}12` : '#fafafa',
                     cursor: 'pointer', transition: 'all 0.15s',
                   }}>
                     <input
                       type="checkbox"
                       checked={form[p.key]}
                       onChange={() => setForm({ ...form, [p.key]: !form[p.key] })}
-                      style={{ width: 16, height: 16, accentColor: '#3b82f6' }}
+                      style={{ width: 16, height: 16, accentColor: p.color, flexShrink: 0 }}
                     />
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.label}</div>
-                      <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{p.desc}</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: form[p.key] ? p.color : '#374151' }}>
+                        {p.label}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: 1 }}>{p.desc}</div>
                     </div>
                   </label>
                 ))}
               </div>
+              <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 8 }}>
+                * Read is required to log in. Without it the account is blocked.
+              </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ marginTop: 4 }}>
+            <button type="submit" className="btn btn-primary" style={{ marginTop: 8 }}>
               Create User
             </button>
           </form>
@@ -213,14 +230,15 @@ export default function UsersPage() {
                         key={p.key}
                         onClick={() => handlePermToggle(user.id, p.key)}
                         style={{
-                          padding: '6px 4px', borderRadius: 6, border: 'none',
-                          cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem',
-                          background: on ? '#3b82f6' : '#f1f5f9',
-                          color: on ? '#fff' : '#64748b',
+                          padding: '7px 4px', borderRadius: 6,
+                          border: `2px solid ${on ? p.color : '#e5e7eb'}`,
+                          cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem',
+                          background: on ? p.color : '#f8fafc',
+                          color: on ? '#fff' : '#94a3b8',
                           transition: 'all 0.15s',
                         }}
                       >
-                        {on ? '✓' : '✕'} {p.label}
+                        {on ? '✓' : '○'} {p.label}
                       </button>
                     );
                   })}
