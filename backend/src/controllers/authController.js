@@ -4,8 +4,22 @@ const pool = require('../config/database');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme_supersecret';
 
-// Called once at startup — ensures the .env admin account always exists in DB
+// Called once at startup — creates users table if missing, then seeds admin
 async function seedAdmin() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(100) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      role ENUM('admin','staff') DEFAULT 'staff',
+      perm_view   TINYINT(1) DEFAULT 1,
+      perm_create TINYINT(1) DEFAULT 0,
+      perm_edit   TINYINT(1) DEFAULT 0,
+      perm_delete TINYINT(1) DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   const username = process.env.ADMIN_USERNAME || 'admin';
   const password = process.env.ADMIN_PASSWORD || 'admin123';
   const [[existing]] = await pool.query('SELECT id FROM users WHERE username = ?', [username]);
