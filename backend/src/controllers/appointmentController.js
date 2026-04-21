@@ -4,6 +4,15 @@ const LeadModel = require('../models/leadModel');
 const SLOTS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
 const appointmentController = {
+  async getAll(req, res) {
+    try {
+      const data = await AppointmentModel.getAll();
+      res.json({ success: true, data });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  },
+
   // Public: returns available hour slots for a given date (?date=YYYY-MM-DD)
   async getAvailableSlots(req, res) {
     try {

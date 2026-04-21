@@ -4,6 +4,7 @@ import CarsPage from './CarsPage';
 import LeadsPage from './LeadsPage';
 import MessagesPage from './MessagesPage';
 import SystemPage from './SystemPage';
+import AppointmentsPage from './AppointmentsPage';
 import { clearToken } from '../auth';
 import '../index.css';
 
@@ -30,6 +31,7 @@ export default function AdminPage() {
           <button className={page === 'cars' ? 'active' : ''} onClick={() => navTo('cars')}>Cars</button>
           <button className={page === 'leads' ? 'active' : ''} onClick={() => navTo('leads')}>Leads</button>
           <button className={page === 'messages' ? 'active' : ''} onClick={() => navTo('messages')}>Messages</button>
+          <button className={page === 'appointments' ? 'active' : ''} onClick={() => navTo('appointments')}>Appointments</button>
           <button className={page === 'system' ? 'active' : ''} onClick={() => navTo('system')}>System</button>
           <button onClick={() => { navigate('/'); setMenuOpen(false); }} className="nav-util">🌐 View Site</button>
           <button onClick={handleLogout} className="nav-util nav-logout">Logout</button>
@@ -39,6 +41,7 @@ export default function AdminPage() {
         {page === 'cars' && <CarsPage />}
         {page === 'leads' && <LeadsPage />}
         {page === 'messages' && <MessagesPage />}
+        {page === 'appointments' && <AppointmentsPage />}
         {page === 'system' && <SystemPage />}
       </div>
     </div>
