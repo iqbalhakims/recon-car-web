@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CarsPage from './CarsPage';
 import LeadsPage from './LeadsPage';
-import MessagesPage from './MessagesPage';
 import SystemPage from './SystemPage';
 import AppointmentsPage from './AppointmentsPage';
 import { clearToken } from '../auth';
@@ -30,7 +29,6 @@ export default function AdminPage() {
         <div className={`nav-links${menuOpen ? ' open' : ''}`}>
           <button className={page === 'cars' ? 'active' : ''} onClick={() => navTo('cars')}>Cars</button>
           <button className={page === 'leads' ? 'active' : ''} onClick={() => navTo('leads')}>Leads</button>
-          <button className={page === 'messages' ? 'active' : ''} onClick={() => navTo('messages')}>Messages</button>
           <button className={page === 'appointments' ? 'active' : ''} onClick={() => navTo('appointments')}>Appointments</button>
           <button className={page === 'system' ? 'active' : ''} onClick={() => navTo('system')}>System</button>
           <button onClick={() => { navigate('/'); setMenuOpen(false); }} className="nav-util">🌐 View Site</button>
@@ -40,7 +38,6 @@ export default function AdminPage() {
       <div className="container">
         {page === 'cars' && <CarsPage />}
         {page === 'leads' && <LeadsPage />}
-        {page === 'messages' && <MessagesPage />}
         {page === 'appointments' && <AppointmentsPage />}
         {page === 'system' && <SystemPage />}
       </div>
