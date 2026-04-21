@@ -233,6 +233,14 @@ export default function CarDetailPage() {
               <span>✅ Viewing available</span>
             </div>
 
+            <button
+              className="btn-book"
+              style={{ marginBottom: 8 }}
+              onClick={() => navigate(`/book?car_id=${car.id}`)}
+            >
+              📅 Book a Visit
+            </button>
+
             <a
               href={`https://wa.me/?text=${encodeURIComponent(
                 `🚗 Check out this car!\n\n` +

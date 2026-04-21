@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/public/HomePage';
 import CarDetailPage from './pages/public/CarDetailPage';
+import BookingPage from './pages/public/BookingPage';
 import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './ProtectedRoute';
@@ -12,6 +13,7 @@ export default function App() {
         {/* Public */}
         <Route path="/" element={<HomePage />} />
         <Route path="/cars/:id" element={<CarDetailPage />} />
+        <Route path="/book" element={<BookingPage />} />
 
         {/* Auth */}
         <Route path="/admin/login" element={<LoginPage />} />

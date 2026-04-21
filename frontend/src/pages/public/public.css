@@ -367,6 +367,45 @@
 .calc-row span:last-child { font-weight: 600; color: #1e2d3d; }
 .calc-disclaimer { font-size: 0.72rem; color: #bbb; margin: 0; }
 
+/* Booking Page */
+.book-field { display: flex; flex-direction: column; gap: 6px; }
+.book-field label { font-size: 0.85rem; font-weight: 700; color: #1e2d3d; }
+.book-field input, .book-field textarea {
+  padding: 11px 14px; border: 1px solid #ddd; border-radius: 10px;
+  font-size: 0.95rem; outline: none; font-family: inherit;
+  transition: border-color 0.15s;
+}
+.book-field input:focus, .book-field textarea:focus { border-color: #5ba4cf; }
+.book-hint { font-size: 0.75rem; color: #aaa; }
+.book-error {
+  background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;
+  border-radius: 8px; padding: 10px 14px; font-size: 0.88rem;
+}
+
+.slot-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+@media (max-width: 400px) { .slot-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.slot-btn {
+  padding: 10px 6px; border: 2px solid #dde8f0; border-radius: 10px;
+  background: white; font-size: 0.85rem; font-weight: 600; color: #1e2d3d;
+  cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column;
+  align-items: center; gap: 2px;
+}
+.slot-btn:hover:not(:disabled):not(.selected) { border-color: #5ba4cf; color: #5ba4cf; }
+.slot-btn.selected { background: #5ba4cf; border-color: #5ba4cf; color: white; }
+.slot-btn.taken { background: #f5f5f5; border-color: #eee; color: #ccc; cursor: not-allowed; }
+.slot-taken-label { font-size: 0.68rem; font-weight: 400; color: #e94560; }
+
+.btn-book {
+  padding: 14px; background: #1e2d3d; color: white;
+  border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-book:hover:not(:disabled) { background: #2a4a6b; }
+.btn-book:disabled { opacity: 0.6; cursor: not-allowed; }
+
 /* Lightbox */
 .lightbox-overlay {
   position: fixed; inset: 0; z-index: 1000;
