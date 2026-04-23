@@ -189,7 +189,7 @@ export default function UsersPage() {
             const lp = localPerms[user.id] || {};
             const changed = PERMS.some(p => !!lp[p.key] !== !!user[p.key]);
             return (
-              <div key={user.id} style={{
+              <div key={user.id} data-testid="user-row" style={{
                 border: '1px solid #e5e7eb', borderRadius: 8,
                 padding: '12px 14px', marginBottom: 10,
               }}>

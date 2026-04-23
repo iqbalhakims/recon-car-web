@@ -47,18 +47,18 @@ describe('Admin - Users Management', () => {
 
     // Toggle Create permission on the newly created user
     cy.contains(username)
-      .closest('[style*="border"]')
+      .closest('[data-testid="user-row"]')
       .contains('button', /Create/)
       .click();
 
     // Save button should appear (unsaved changes)
     cy.contains(username)
-      .closest('[style*="border"]')
+      .closest('[data-testid="user-row"]')
       .contains('button', /Save/)
       .click();
 
     cy.contains(username)
-      .closest('[style*="border"]')
+      .closest('[data-testid="user-row"]')
       .contains('Unsaved changes')
       .should('not.exist');
   });
@@ -72,7 +72,7 @@ describe('Admin - Users Management', () => {
     cy.contains(`User "${username}" created.`).should('be.visible');
 
     cy.contains(username)
-      .closest('[style*="border"]')
+      .closest('[data-testid="user-row"]')
       .contains('button', /Delete/)
       .click();
 

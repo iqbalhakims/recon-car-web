@@ -106,7 +106,8 @@ function LoanCalculator({ carPrice, carModel, carYear, carRef }) {
 }
 
 export default function CarDetailPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
+  const id = slug.split('-').pop();
   const navigate = useNavigate();
   const [car, setCar] = useState(null);
   const [images, setImages] = useState([]);

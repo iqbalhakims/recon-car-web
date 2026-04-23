@@ -2,6 +2,11 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './public.css';
 
+function carSlug(car) {
+  const base = car.model.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return car.year ? `${car.year}-${base}-${car.id}` : `${base}-${car.id}`;
+}
+
 const ABOUT = {
   name: 'Edaran Idaman Suri Sdn Bhd',
   description: 'Your trusted used car dealer in Alor Star, Kedah. We offer quality selling record cars with full loan arrangement, low deposit, and transparent pricing — serving buyers across Peninsular Malaysia.',
@@ -213,7 +218,7 @@ export default function HomePage() {
 
         <div className="pub-grid">
           {paginated.map(car => (
-            <CarCard key={car.id} car={car} onClick={() => navigate(`/cars/${car.id}`)} />
+            <CarCard key={car.id} car={car} onClick={() => navigate(`/cars/${carSlug(car)}`)} />
           ))}
         </div>
 

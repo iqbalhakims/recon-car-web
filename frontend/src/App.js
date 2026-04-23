@@ -12,7 +12,7 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/cars/:id" element={<CarDetailPage />} />
+        <Route path="/cars/:slug" element={<CarDetailPage />} />
         <Route path="/book" element={<BookingPage />} />
 
         {/* Auth */}
