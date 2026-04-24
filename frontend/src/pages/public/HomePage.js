@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './public.css';
+import useVisitorTrack from '../../useVisitorTrack';
 
 function carSlug(car) {
   const base = car.model.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -18,6 +19,7 @@ const ABOUT = {
 const PAGE_SIZE = 6;
 
 export default function HomePage() {
+  useVisitorTrack();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

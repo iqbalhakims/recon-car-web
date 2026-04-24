@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './public.css';
+import useVisitorTrack from '../../useVisitorTrack';
 
 function LoanCalculator({ carPrice, carModel, carYear, carRef }) {
   const [dp, setDp] = useState(Math.round(carPrice * 0.1));
@@ -106,6 +107,7 @@ function LoanCalculator({ carPrice, carModel, carYear, carRef }) {
 }
 
 export default function CarDetailPage() {
+  useVisitorTrack();
   const { slug } = useParams();
   const id = slug.split('-').pop();
   const navigate = useNavigate();

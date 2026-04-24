@@ -11,6 +11,7 @@ const authRoutes = require('./routes/authRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const systemRoutes = require('./routes/systemRoutes');
+const visitorRoutes = require('./routes/visitorRoutes');
 const userRoutes = require('./routes/userRoutes');
 const { seedAdmin } = require('./controllers/authController');
 
@@ -46,6 +47,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/cars/:id/videos', videoRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/system', systemRoutes);
+app.use('/api/visitors', visitorRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 

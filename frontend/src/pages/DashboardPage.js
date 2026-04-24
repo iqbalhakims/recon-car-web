@@ -135,14 +135,16 @@ function SystemHealth({ cpu, ram }) {
 export default function DashboardPage({ onNavigate }) {
   const [data, setData] = useState(null);
   const [sysStats, setSysStats] = useState(null);
+  const [visitors, setVisitors] = useState(null);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
   const fetchAll = useCallback(async () => {
     try {
-      const [dashRes, sysRes] = await Promise.all([
+      const [dashRes, sysRes, visRes] = await Promise.all([
         authFetch('/api/dashboard/stats'),
         authFetch('/api/system/stats'),
+        authFetch('/api/visitors/stats'),
       ]);
       if (!dashRes.ok) throw new Error('Failed to load dashboard');
       const dash = await dashRes.json();
@@ -150,6 +152,10 @@ export default function DashboardPage({ onNavigate }) {
       if (sysRes.ok) {
         const sys = await sysRes.json();
         setSysStats(sys);
+      }
+      if (visRes.ok) {
+        const vis = await visRes.json();
+        setVisitors(vis.data);
       }
       setLastUpdated(new Date());
       setError(null);
@@ -206,6 +212,15 @@ export default function DashboardPage({ onNavigate }) {
         <StatCard label="Scheduled" value={appointments.scheduled} color="#3b82f6" onClick={() => onNavigate('appointments')} />
         <StatCard label="Completed" value={appointments.completed} color="#10b981" onClick={() => onNavigate('appointments')} />
         <StatCard label="Cancelled" value={appointments.cancelled} color="#9ca3af" onClick={() => onNavigate('appointments')} />
+      </div>
+
+      {/* ── Visitors ── */}
+      <SectionTitle>Public Site Visitors</SectionTitle>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+        <StatCard label="Today" value={visitors?.today ?? '—'} color="#6366f1" />
+        <StatCard label="Last 7 Days" value={visitors?.this_week ?? '—'} color="#3b82f6" />
+        <StatCard label="Last 30 Days" value={visitors?.this_month ?? '—'} color="#10b981" />
+        <StatCard label="All Time" value={visitors?.total ?? '—'} />
       </div>
 
       {/* ── Users + System ── */}
