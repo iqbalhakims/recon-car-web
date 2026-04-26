@@ -107,7 +107,7 @@ export default function AppointmentsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {visible.map((a, i) => {
+                  {visible.map((a) => {
                     const dt = new Date(a.appointment_date);
                     const isToday = a.appointment_date?.slice(0, 10) === today;
                     return (
@@ -130,6 +130,9 @@ export default function AppointmentsPage() {
                               <button onClick={() => updateStatus(a.id, 'completed')} style={{ marginRight: 6, padding: '4px 10px', borderRadius: 6, border: '1px solid #16a34a', color: '#16a34a', background: '#fff', fontSize: '0.78rem', cursor: 'pointer' }}>Done</button>
                               <button onClick={() => updateStatus(a.id, 'cancelled')} style={{ marginRight: 6, padding: '4px 10px', borderRadius: 6, border: '1px solid #dc2626', color: '#dc2626', background: '#fff', fontSize: '0.78rem', cursor: 'pointer' }}>Cancel</button>
                             </>
+                          )}
+                          {a.profile_token && (
+                            <a href={`/profile/${a.profile_token}`} target="_blank" rel="noreferrer" style={{ marginRight: 6, padding: '4px 10px', borderRadius: 6, border: '1px solid #5ba4cf', color: '#5ba4cf', background: '#fff', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }}>Profile</a>
                           )}
                           <button onClick={() => deleteAppt(a.id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid #e5e7eb', color: '#9ca3af', background: '#fff', fontSize: '0.78rem', cursor: 'pointer' }}>Delete</button>
                         </td>

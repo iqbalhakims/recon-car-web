@@ -3,7 +3,8 @@ const pool = require('../config/database');
 const AppointmentModel = {
   async getAll() {
     const [rows] = await pool.query(`
-      SELECT a.*, l.name AS lead_name, l.phone AS lead_phone, c.model AS car_model, c.ref_no AS car_ref
+      SELECT a.*, l.name AS lead_name, l.phone AS lead_phone, l.profile_token,
+             c.model AS car_model, c.ref_no AS car_ref
       FROM appointments a
       JOIN leads l ON a.lead_id = l.id
       LEFT JOIN cars c ON l.car_id = c.id
