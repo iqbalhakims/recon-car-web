@@ -13,6 +13,7 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const visitorRoutes = require('./routes/visitorRoutes');
 const userRoutes = require('./routes/userRoutes');
+const customerRoutes = require('./routes/customerRoutes');
 const { seedAdmin } = require('./controllers/authController');
 
 const pool = require('./config/database');
@@ -50,6 +51,7 @@ app.use('/api/system', systemRoutes);
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/customer', customerRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Car Sales CRM API is running' });
@@ -63,6 +65,15 @@ async function runMigrations() {
       last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
+  // Add email + profile_token to leads if not present
+  const [cols] = await pool.query(`SHOW COLUMNS FROM leads LIKE 'email'`);
+  if (cols.length === 0) {
+    await pool.query(`ALTER TABLE leads ADD COLUMN email VARCHAR(255) NULL AFTER phone`);
+  }
+  const [tokenCols] = await pool.query(`SHOW COLUMNS FROM leads LIKE 'profile_token'`);
+  if (tokenCols.length === 0) {
+    await pool.query(`ALTER TABLE leads ADD COLUMN profile_token VARCHAR(64) NULL UNIQUE AFTER email`);
+  }
 }
 
 waitForDb()

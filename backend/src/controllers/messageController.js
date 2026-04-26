@@ -1,5 +1,6 @@
 const CarModel = require('../models/carModel');
 const { generateMessage } = require('../services/messageService');
+const { sendMessageNotification } = require('../services/emailService');
 
 const messageController = {
   async generate(req, res) {
@@ -14,6 +15,7 @@ const messageController = {
       }
       const message = generateMessage(car);
       res.json({ success: true, message });
+      sendMessageNotification(car, message).catch(e => console.error('[Email] message error:', e.message));
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
     }
