@@ -13,6 +13,9 @@ A full-stack Customer Relationship Management (CRM) system for car dealerships. 
 - [API Reference](#api-reference)
 - [User Access Control](#user-access-control)
 - [System Monitor](#system-monitor)
+- [Customer Profile System](#customer-profile-system)
+- [Trending & Analytics](#trending--analytics)
+- [Email Notifications](#email-notifications)
 - [Known Issues & Troubleshooting](#known-issues--troubleshooting)
 - [Environment Variables](#environment-variables)
 - [Getting Started](#getting-started)
@@ -35,7 +38,9 @@ A full-stack Customer Relationship Management (CRM) system for car dealerships. 
 - Filter by make/model, price range, year, mileage, and condition
 - View car detail page with full image gallery and video
 - Submit a lead (name + phone) to express interest in a car
-- Book an appointment online
+- **3-step appointment booking** — details → date/time → review & confirm
+- **Customer profile page** (`/profile/:token`) — track all appointments and booking status, no login needed
+- **Trending strip** — shows the top 6 most-viewed cars (last 7 days) above the hero banner
 
 ### Admin Panel (`/admin/login`)
 - Secure login with bcrypt-hashed password and 7-day JWT session
@@ -44,9 +49,11 @@ A full-stack Customer Relationship Management (CRM) system for car dealerships. 
 - Record dents and scratches with photo evidence
 - Manage leads — view contact info, update status, set follow-up dates
 - Create and manage appointments tied to leads (scheduled / completed / cancelled)
+- **Profile button** on every appointment row — opens the customer's profile page in a new tab
 - Change car status (available / sold / reserved)
 - **User Management** — create staff accounts with granular permissions (Read / Create / Edit / Delete)
 - **System Monitor** — live CPU, RAM, Node.js heap, API traffic, DB latency, and upload storage dashboards
+- **Trending widget** — most-viewed cars ranked by Today / 7 Days / All Time, powered by Redis
 
 ---
 
@@ -57,7 +64,9 @@ A full-stack Customer Relationship Management (CRM) system for car dealerships. 
 | Frontend | React 18, React Router v6 |
 | Backend | Node.js, Express 4 |
 | Database | MySQL 8 |
+| Cache / Analytics | Redis 7 (ioredis) |
 | Auth | JWT (jsonwebtoken), bcryptjs |
+| Email | Nodemailer (Gmail SMTP) |
 | File Uploads | Multer (images & videos, max 200 MB) |
 | Reverse Proxy | Nginx |
 | Containerisation | Docker, Docker Compose |
@@ -77,7 +86,8 @@ car-sales-crm/
 │   ├── src/
 │   │   ├── app.js                      # Express app entry point
 │   │   ├── config/
-│   │   │   └── database.js             # MySQL connection pool (with query latency tracking)
+│   │   │   ├── database.js             # MySQL connection pool (with query latency tracking)
+│   │   │   └── redis.js                # ioredis client with graceful fallback
 │   │   ├── controllers/
 │   │   │   ├── authController.js       # Login, verify, admin seed on startup
 │   │   │   ├── carController.js
@@ -87,6 +97,8 @@ car-sales-crm/
 │   │   │   ├── leadController.js
 │   │   │   ├── appointmentController.js
 │   │   │   ├── messageController.js
+│   │   │   ├── customerController.js   # Public customer profile by token
+│   │   │   ├── trendingController.js   # Click tracking + trending via Redis
 │   │   │   ├── systemController.js     # CPU / RAM / API / DB / storage stats
 │   │   │   └── userController.js       # Staff user CRUD
 │   │   ├── models/
@@ -104,6 +116,7 @@ car-sales-crm/
 │   │   │   ├── leadRoutes.js
 │   │   │   ├── appointmentRoutes.js
 │   │   │   ├── messageRoutes.js
+│   │   │   ├── customerRoutes.js       # GET /api/customer/:token (public)
 │   │   │   ├── systemRoutes.js         # GET /api/system/stats
 │   │   │   └── userRoutes.js           # CRUD /api/users (admin only)
 │   │   ├── middleware/
@@ -114,7 +127,8 @@ car-sales-crm/
 │   │   ├── utils/
 │   │   │   └── metricsStore.js         # In-memory per-minute bucket store (6h)
 │   │   └── services/
-│   │       └── messageService.js
+│   │       ├── messageService.js
+│   │       └── emailService.js         # Nodemailer — staff + customer email notifications
 │   ├── uploads/                        # Persisted uploaded files (volume-mounted)
 │   ├── Dockerfile
 │   └── package.json
@@ -127,14 +141,16 @@ car-sales-crm/
 │   │   ├── ProtectedRoute.js           # Route guard + injects PermContext
 │   │   ├── pages/
 │   │   │   ├── public/
-│   │   │   │   ├── HomePage.js
-│   │   │   │   ├── CarDetailPage.js
-│   │   │   │   └── BookingPage.js
+│   │   │   │   ├── HomePage.js         # Trending strip above hero
+│   │   │   │   ├── CarDetailPage.js    # Fires click tracking on load
+│   │   │   │   ├── BookingPage.js      # 3-step booking flow
+│   │   │   │   └── CustomerProfilePage.js  # /profile/:token
 │   │   │   ├── LoginPage.js
 │   │   │   ├── AdminPage.js            # Navbar + tab router
 │   │   │   ├── CarsPage.js             # Permission-aware
 │   │   │   ├── LeadsPage.js            # Permission-aware
-│   │   │   ├── AppointmentsPage.js
+│   │   │   ├── AppointmentsPage.js     # Profile button per row
+│   │   │   ├── DashboardPage.js        # Trending widget + all KPI panels
 │   │   │   ├── SystemPage.js           # Live system monitor dashboard
 │   │   │   └── UsersPage.js            # Staff user management (admin only)
 │   ├── cypress/
@@ -204,6 +220,8 @@ car-sales-crm/
 | `id` | INT PK AUTO_INCREMENT | |
 | `name` | VARCHAR(255) | |
 | `phone` | VARCHAR(50) | |
+| `email` | VARCHAR(255) | nullable — added via migration |
+| `profile_token` | VARCHAR(64) UNIQUE | nullable — auto-generated on booking |
 | `car_id` | INT FK → cars.id | SET NULL on DELETE |
 | `status` | VARCHAR(50) | default `new` |
 | `next_follow_up_date` | DATE | nullable |
@@ -232,7 +250,7 @@ car-sales-crm/
 | `perm_delete` | TINYINT(1) | Can delete records |
 | `created_at` | TIMESTAMP | |
 
-> **Auto-migrations:** `carModel.js` runs `ALTER TABLE` on startup to add `year`, `grade`, and `ref_no` columns if missing. The `users` table is also created on startup via `seedAdmin()` if it doesn't exist.
+> **Auto-migrations:** On every startup `runMigrations()` in `app.js` safely applies schema changes: adds `year`, `grade`, `ref_no` to `cars`; creates `visitor_sessions`; adds `email` and `profile_token` to `leads`; backfills `profile_token` for all existing leads. The `users` table is created via `seedAdmin()` if missing.
 
 ---
 
@@ -296,10 +314,27 @@ Authorization: Bearer <token>
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
+| GET | `/api/appointments/available?date=YYYY-MM-DD` | Public | Available time slots for a date |
+| POST | `/api/appointments/book` | Public | Customer self-booking (3-step flow) |
+| GET | `/api/appointments` | Staff | List all appointments |
 | GET | `/api/appointments/lead/:leadId` | Staff | Get appointments for a lead |
 | POST | `/api/appointments` | Staff | Create a new appointment |
 | PATCH | `/api/appointments/:id/status` | Staff | Update appointment status |
 | DELETE | `/api/appointments/:id` | Staff | Delete an appointment |
+
+### Customer Profile
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/customer/:token` | Public | Get customer profile + appointments by token |
+
+### Trending / Analytics
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/cars/:id/click` | Public | Record a car page view (Redis) |
+| GET | `/api/cars/trending?period=7d&limit=8` | Public | Ranked trending cars (`today`/`7d`/`alltime`) |
+| GET | `/api/cars/:id/views` | Staff | View count for a single car (alltime + today) |
 
 ### Users (Admin only)
 
@@ -387,6 +422,85 @@ Accessible via the **System** tab in the admin panel. All data is collected in-p
 - **Color thresholds** — metrics turn amber >60% and red >85%
 - **DB latency** — `pool.query` is wrapped to record every query duration; slow queries (>100ms) are stored separately with timestamps
 - **API metrics** — Express middleware records status code and latency into per-minute buckets
+
+---
+
+## Customer Profile System
+
+Customers get a persistent, shareable profile page with no login required.
+
+### How it works
+
+1. Customer fills the **3-step booking form**: details (name, phone, email) → date/time → review
+2. On submit, a `profile_token` (64-char random hex) is generated and stored on their lead record
+3. The success screen shows a **"View My Profile & Appointments"** link → `/profile/:token`
+4. If an email was provided, a confirmation email is sent with the profile link
+5. Returning customers (same phone number) reuse the same token across all bookings
+
+### Customer profile page (`/profile/:token`)
+
+- Profile card: name, phone, email, interested car, booking stats
+- Upcoming appointments (scheduled) with date/time and status badge
+- Past appointments (completed / cancelled)
+- "Book Another Appointment" button
+- Designed to be bookmarked — no login ever required
+
+### Admin view
+
+In the **Appointments** tab, every row has a **Profile** button (blue) that opens the customer's profile in a new tab. Existing leads without a token are automatically backfilled on server startup.
+
+---
+
+## Trending & Analytics
+
+Car view tracking is powered by **Redis** — zero MySQL load from analytics traffic.
+
+### Architecture
+
+| Redis Key | Type | TTL | Purpose |
+|-----------|------|-----|---------|
+| `cars:views:alltime` | Sorted Set | None | Cumulative view count per car |
+| `cars:views:daily:YYYY-MM-DD` | Sorted Set | 30 days | Per-day view count per car |
+
+- `POST /api/cars/:id/click` — fired silently from `CarDetailPage` on load; increments both the alltime and today's daily key
+- `GET /api/cars/trending?period=7d` — unions the last 7 daily keys via `ZUNIONSTORE`, returns top N cars enriched with MySQL car data
+- **Graceful fallback** — if Redis is unavailable, tracking silently skips and trending endpoints return empty; the rest of the site is completely unaffected
+
+### Where it appears
+
+| Location | What it shows |
+|----------|---------------|
+| **Homepage** (above hero) | Top 6 cars — 7-day period, pill-style strip, hidden if no data |
+| **Admin Dashboard** | Full table with Today / 7 Days / All Time toggle, view count badge |
+
+---
+
+## Email Notifications
+
+Powered by **Nodemailer** using Gmail SMTP. All emails are fire-and-forget — failures are logged but never break the API response.
+
+### Triggers
+
+| Event | Recipient | Content |
+|-------|-----------|---------|
+| Appointment booked (public or staff) | Staff (`NOTIFY_EMAIL`) | Customer name, phone, date/time, car, notes |
+| Appointment booked (public, email provided) | Customer | Confirmation with profile link button |
+| Car message generated | Staff (`NOTIFY_EMAIL`) | Car details + generated WhatsApp message |
+
+### Setup
+
+Add these to `backend/.env`:
+
+```env
+SMTP_USER=your_gmail@gmail.com
+SMTP_PASS=your_16_char_app_password
+NOTIFY_EMAIL=recondalorstar@gmail.com
+FRONTEND_URL=https://iqbalhakim.site
+```
+
+> `SMTP_PASS` must be a **Gmail App Password** (not your account password). Generate one at: Google Account → Security → 2-Step Verification → App passwords.
+
+If `SMTP_USER` or `SMTP_PASS` are not set, email sending is skipped with a console warning — the site continues to work normally.
 
 ---
 
@@ -493,6 +607,17 @@ ADMIN_PASSWORD=your_admin_password
 
 # JWT signing secret
 JWT_SECRET=your_supersecret_jwt_key
+
+# Redis (optional — trending/analytics; site works without it)
+REDIS_URL=redis://redis:6379
+
+# Frontend URL (used in customer confirmation email links)
+FRONTEND_URL=https://iqbalhakim.site
+
+# Email notifications (optional — skipped if not set)
+SMTP_USER=your_gmail@gmail.com
+SMTP_PASS=your_gmail_app_password
+NOTIFY_EMAIL=staff_email@gmail.com
 ```
 
 > For Docker deployments these are injected via `docker-compose.yml` and GitHub Actions secrets.
@@ -662,9 +787,10 @@ The in-app **System Monitor** (admin panel → System tab) provides real-time da
 
 | Path | Access | Description |
 |------|--------|-------------|
-| `/` | Public | Car listing homepage |
-| `/cars/:id` | Public | Car detail page |
-| `/book` | Public | Appointment booking |
+| `/` | Public | Car listing homepage (with trending strip) |
+| `/cars/:slug` | Public | Car detail page (fires click tracking) |
+| `/book` | Public | 3-step appointment booking |
+| `/profile/:token` | Public | Customer profile — appointments & status |
 | `/admin/login` | Public | Staff login |
 | `/admin/*` | Protected | Admin panel (requires JWT) |
 

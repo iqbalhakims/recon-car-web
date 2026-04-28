@@ -17,6 +17,8 @@ const customerRoutes = require('./routes/customerRoutes');
 const { seedAdmin } = require('./controllers/authController');
 
 const pool = require('./config/database');
+const { getClient } = require('./config/redis');
+getClient(); // initialise Redis connection early
 const requestMetrics = require('./middleware/requestMetrics');
 
 const app = express();

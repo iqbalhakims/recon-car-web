@@ -18,6 +18,47 @@ const ABOUT = {
 
 const PAGE_SIZE = 6;
 
+function TrendingStrip({ navigate }) {
+  const [trending, setTrending] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/cars/trending?period=7d&limit=6')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.data.length) setTrending(d.data); })
+      .catch(() => {});
+  }, []);
+
+  if (!trending.length) return null;
+
+  return (
+    <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '12px 0' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflowX: 'auto', paddingBottom: 4 }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#e94560', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+            🔥 Trending
+          </span>
+          {trending.map((car, i) => (
+            <button
+              key={car.id}
+              onClick={() => navigate(`/cars/${carSlug(car)}`)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap',
+                background: '#f7f8fa', border: '1px solid #e5e7eb', borderRadius: 20,
+                padding: '5px 12px', cursor: 'pointer', fontSize: '0.8rem',
+                fontWeight: 600, color: '#1e2d3d', flexShrink: 0,
+              }}
+            >
+              <span style={{ color: '#c9a84c', fontWeight: 900, fontSize: '0.72rem' }}>#{i + 1}</span>
+              {car.model}
+              <span style={{ color: '#aaa', fontSize: '0.72rem', fontWeight: 400 }}>{car.views} views</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   useVisitorTrack();
   const [cars, setCars] = useState([]);
@@ -103,6 +144,8 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
+      <TrendingStrip navigate={navigate} />
 
       {/* Hero banner */}
       <div className="pub-hero">

@@ -135,6 +135,8 @@ export default function CarDetailPage() {
       if (videosData.success) setVideos(videosData.data);
       setLoading(false);
     });
+    // Track click for trending
+    fetch(`/api/cars/${id}/click`, { method: 'POST' }).catch(() => {});
   }, [id]);
 
   if (loading) return <div className="pub-layout"><p className="pub-empty">Loading...</p></div>;

@@ -3,12 +3,18 @@ const router = express.Router();
 const carController = require('../controllers/carController');
 const { imageUpload } = require('../middleware/upload');
 const imageController = require('../controllers/imageController');
+const trendingController = require('../controllers/trendingController');
+
+// Trending — must be before /:id routes
+router.get('/trending', trendingController.getTrending);
 
 router.get('/', carController.getAll);
 router.post('/', carController.create);
 router.put('/:id', carController.update);
 router.patch('/:id/status', carController.updateStatus);
 router.delete('/:id', carController.delete);
+router.post('/:id/click', trendingController.trackClick);
+router.get('/:id/views', trendingController.getViews);
 
 // Image routes
 router.get('/:id/images', imageController.getImages);

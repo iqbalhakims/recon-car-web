@@ -150,6 +150,90 @@ function ProgressBar({ label, pct }) {
   );
 }
 
+/* ─── trending widget ────────────────────────────────────────────────────── */
+function TrendingWidget() {
+  const [trending, setTrending] = useState([]);
+  const [period, setPeriod] = useState('7d');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/cars/trending?period=${period}&limit=8`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setTrending(d.data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [period]);
+
+  const periods = [
+    { key: 'today',   label: 'Today' },
+    { key: '7d',      label: '7 Days' },
+    { key: 'alltime', label: 'All Time' },
+  ];
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: AWS.textSub, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+        Trending Cars
+      </div>
+      <Widget
+        title="🔥 Most Viewed Cars"
+        action={
+          <div style={{ display: 'flex', gap: 4 }}>
+            {periods.map(p => (
+              <button key={p.key} onClick={() => setPeriod(p.key)} style={{
+                padding: '2px 10px', borderRadius: 3, fontSize: '0.75rem', cursor: 'pointer',
+                background: period === p.key ? AWS.blue : 'transparent',
+                color: period === p.key ? '#fff' : AWS.blue,
+                border: `1px solid ${AWS.blue}`, fontWeight: 600,
+              }}>{p.label}</button>
+            ))}
+          </div>
+        }
+      >
+        {loading ? (
+          <div style={{ padding: '20px 16px', color: AWS.textSub, fontSize: '0.83rem' }}>Loading…</div>
+        ) : trending.length === 0 ? (
+          <div style={{ padding: '20px 16px', color: AWS.textSub, fontSize: '0.83rem', textAlign: 'center' }}>
+            No data yet — views will appear as customers browse cars.
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem' }}>
+              <thead>
+                <tr style={{ background: '#fafafa', borderBottom: `1px solid ${AWS.border}` }}>
+                  {['#', 'Car', 'Price', 'Mileage', 'Views'].map(h => (
+                    <th key={h} style={{ padding: '8px 16px', textAlign: 'left', color: AWS.textSub, fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {trending.map((car, i) => (
+                  <tr key={car.id} style={{ borderBottom: `1px solid #f2f3f4` }}
+                    onMouseEnter={e => e.currentTarget.style.background = AWS.rowHover}
+                    onMouseLeave={e => e.currentTarget.style.background = ''}>
+                    <td style={{ padding: '8px 16px', fontWeight: 700, color: i === 0 ? '#e67e22' : i === 1 ? '#95a5a6' : i === 2 ? '#ca8a04' : AWS.textSub }}>
+                      #{i + 1}
+                    </td>
+                    <td style={{ padding: '8px 16px', fontWeight: 600, color: AWS.text }}>{car.model}{car.year ? ` (${car.year})` : ''}</td>
+                    <td style={{ padding: '8px 16px', color: AWS.textSub }}>RM {car.price?.toLocaleString()}</td>
+                    <td style={{ padding: '8px 16px', color: AWS.textSub }}>{car.mileage?.toLocaleString()} km</td>
+                    <td style={{ padding: '8px 16px' }}>
+                      <span style={{ background: '#e8f5e9', color: '#1d8348', fontWeight: 700, fontSize: '0.8rem', padding: '2px 8px', borderRadius: 3 }}>
+                        {car.views?.toLocaleString()}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Widget>
+    </div>
+  );
+}
+
 /* ─── main ───────────────────────────────────────────────────────────────── */
 export default function DashboardPage({ onNavigate }) {
   const [data, setData] = useState(null);
@@ -327,7 +411,10 @@ export default function DashboardPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* ── Row 4: Today's appointments ── */}
+      {/* ── Row 4: Trending cars ── */}
+      <TrendingWidget />
+
+      {/* ── Row 5: Today's appointments ── */}
       <div style={{ marginTop: 20 }}>
         <Widget title={`Today's Appointments (${todayAppts.length})`}>
           <AwsTable
