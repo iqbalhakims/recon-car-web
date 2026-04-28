@@ -151,6 +151,12 @@ function ProgressBar({ label, pct }) {
 }
 
 /* ─── trending widget ────────────────────────────────────────────────────── */
+const PODIUM = [
+  { rank: 1, medal: '🥇', bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '#f59e0b', labelColor: '#92400e' },
+  { rank: 2, medal: '🥈', bg: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', border: '#94a3b8', labelColor: '#475569' },
+  { rank: 3, medal: '🥉', bg: 'linear-gradient(135deg, #fef0e6, #fddfc4)', border: '#d97706', labelColor: '#92400e' },
+];
+
 function TrendingWidget() {
   const [trending, setTrending] = useState([]);
   const [period, setPeriod] = useState('7d');
@@ -158,7 +164,7 @@ function TrendingWidget() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/cars/trending?period=${period}&limit=8`)
+    fetch(`/api/cars/trending?period=${period}&limit=10`)
       .then(r => r.json())
       .then(d => { if (d.success) setTrending(d.data); })
       .catch(() => {})
@@ -170,6 +176,9 @@ function TrendingWidget() {
     { key: '7d',      label: '7 Days' },
     { key: 'alltime', label: 'All Time' },
   ];
+
+  const top3 = trending.slice(0, 3);
+  const rest  = trending.slice(3);
 
   return (
     <div style={{ marginTop: 20 }}>
@@ -198,36 +207,76 @@ function TrendingWidget() {
             No data yet — views will appear as customers browse cars.
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem' }}>
-              <thead>
-                <tr style={{ background: '#fafafa', borderBottom: `1px solid ${AWS.border}` }}>
-                  {['#', 'Car', 'Price', 'Mileage', 'Views'].map(h => (
-                    <th key={h} style={{ padding: '8px 16px', textAlign: 'left', color: AWS.textSub, fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {trending.map((car, i) => (
-                  <tr key={car.id} style={{ borderBottom: `1px solid #f2f3f4` }}
-                    onMouseEnter={e => e.currentTarget.style.background = AWS.rowHover}
-                    onMouseLeave={e => e.currentTarget.style.background = ''}>
-                    <td style={{ padding: '8px 16px', fontWeight: 700, color: i === 0 ? '#e67e22' : i === 1 ? '#95a5a6' : i === 2 ? '#ca8a04' : AWS.textSub }}>
-                      #{i + 1}
-                    </td>
-                    <td style={{ padding: '8px 16px', fontWeight: 600, color: AWS.text }}>{car.model}{car.year ? ` (${car.year})` : ''}</td>
-                    <td style={{ padding: '8px 16px', color: AWS.textSub }}>RM {car.price?.toLocaleString()}</td>
-                    <td style={{ padding: '8px 16px', color: AWS.textSub }}>{car.mileage?.toLocaleString()} km</td>
-                    <td style={{ padding: '8px 16px' }}>
-                      <span style={{ background: '#e8f5e9', color: '#1d8348', fontWeight: 700, fontSize: '0.8rem', padding: '2px 8px', borderRadius: 3 }}>
-                        {car.views?.toLocaleString()}
+          <>
+            {/* ── Top 3 podium ── */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${top3.length}, 1fr)`,
+              gap: 1,
+              borderBottom: `1px solid ${AWS.border}`,
+            }}>
+              {top3.map((car, i) => {
+                const p = PODIUM[i];
+                return (
+                  <div key={car.id} style={{
+                    background: p.bg,
+                    borderRight: i < top3.length - 1 ? `1px solid ${AWS.border}` : 'none',
+                    padding: '16px 18px',
+                    display: 'flex', flexDirection: 'column', gap: 6,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{p.medal}</span>
+                      <span style={{
+                        background: 'rgba(0,0,0,0.08)', borderRadius: 3,
+                        padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700, color: p.labelColor,
+                      }}>
+                        {car.views?.toLocaleString()} views
                       </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: AWS.text, lineHeight: 1.3 }}>
+                      {car.model}{car.year ? ` (${car.year})` : ''}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: AWS.textSub, display: 'flex', gap: 10 }}>
+                      <span>RM {car.price?.toLocaleString()}</span>
+                      {car.mileage && <span>{car.mileage?.toLocaleString()} km</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── #4 and below ── */}
+            {rest.length > 0 && (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem' }}>
+                  <thead>
+                    <tr style={{ background: '#fafafa', borderBottom: `1px solid ${AWS.border}` }}>
+                      {['#', 'Car', 'Price', 'Mileage', 'Views'].map(h => (
+                        <th key={h} style={{ padding: '7px 16px', textAlign: 'left', color: AWS.textSub, fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rest.map((car, i) => (
+                      <tr key={car.id} style={{ borderBottom: `1px solid #f2f3f4` }}
+                        onMouseEnter={e => e.currentTarget.style.background = AWS.rowHover}
+                        onMouseLeave={e => e.currentTarget.style.background = ''}>
+                        <td style={{ padding: '7px 16px', fontWeight: 700, color: AWS.textSub }}>#{i + 4}</td>
+                        <td style={{ padding: '7px 16px', fontWeight: 600, color: AWS.text }}>{car.model}{car.year ? ` (${car.year})` : ''}</td>
+                        <td style={{ padding: '7px 16px', color: AWS.textSub }}>RM {car.price?.toLocaleString()}</td>
+                        <td style={{ padding: '7px 16px', color: AWS.textSub }}>{car.mileage?.toLocaleString()} km</td>
+                        <td style={{ padding: '7px 16px' }}>
+                          <span style={{ background: '#e8f5e9', color: '#1d8348', fontWeight: 700, fontSize: '0.78rem', padding: '2px 8px', borderRadius: 3 }}>
+                            {car.views?.toLocaleString()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </Widget>
     </div>
