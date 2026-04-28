@@ -6,6 +6,7 @@ import LeadsPage from './LeadsPage';
 import SystemPage from './SystemPage';
 import AppointmentsPage from './AppointmentsPage';
 import UsersPage from './UsersPage';
+import AnalyticsPage from './AnalyticsPage';
 import { clearToken } from '../auth';
 import { usePerms } from '../PermContext';
 import '../index.css';
@@ -35,6 +36,7 @@ export default function AdminPage() {
           <button className={page === 'cars' ? 'active' : ''} onClick={() => navTo('cars')}>Cars</button>
           <button className={page === 'leads' ? 'active' : ''} onClick={() => navTo('leads')}>Leads</button>
           <button className={page === 'appointments' ? 'active' : ''} onClick={() => navTo('appointments')}>Appointments</button>
+          <button className={page === 'analytics' ? 'active' : ''} onClick={() => navTo('analytics')}>Analytics</button>
           <button className={page === 'system' ? 'active' : ''} onClick={() => navTo('system')}>System</button>
           {role === 'admin' && (
             <button className={page === 'users' ? 'active' : ''} onClick={() => navTo('users')}>Users</button>
@@ -48,6 +50,7 @@ export default function AdminPage() {
         {page === 'cars'         && <CarsPage />}
         {page === 'leads'        && <LeadsPage />}
         {page === 'appointments' && <AppointmentsPage />}
+        {page === 'analytics'    && <AnalyticsPage />}
         {page === 'system'       && <SystemPage />}
         {page === 'users' && role === 'admin' && <UsersPage />}
       </div>

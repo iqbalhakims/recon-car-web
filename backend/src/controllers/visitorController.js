@@ -26,3 +26,28 @@ exports.getStats = async (_req, res) => {
   );
   res.json({ success: true, data: { total, today, this_week, this_month } });
 };
+
+exports.getHistory = async (req, res) => {
+  const days = Math.min(parseInt(req.query.days) || 30, 90);
+  const [rows] = await pool.query(
+    `SELECT DATE(first_seen) AS date, COUNT(*) AS visitors
+     FROM visitor_sessions
+     WHERE first_seen >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+     GROUP BY DATE(first_seen)
+     ORDER BY date ASC`,
+    [days]
+  );
+
+  // Fill in zeros for days with no visits
+  const result = [];
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const found = rows.find(r => String(r.date).slice(0, 10) === dateStr);
+    result.push({ date: dateStr, visitors: found ? Number(found.visitors) : 0 });
+  }
+
+  res.json({ success: true, data: result });
+};
