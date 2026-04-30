@@ -34,6 +34,8 @@ function getDirSizeBytes(dirPath) {
   return total;
 }
 
+let storageCached = { usedBytes: 0, fileCount: 0, ts: 0 };
+
 exports.getStats = (_req, res) => {
   // ── CPU ─────────────────────────────────────────────────────────────────
   const totalMem = os.totalmem();
@@ -64,11 +66,15 @@ exports.getStats = (_req, res) => {
     avgLatencyMs: b.requests > 0 ? Math.round(b.totalLatencyMs / b.requests) : 0,
   }));
 
-  // ── Upload storage ────────────────────────────────────────────────────────
+  // ── Upload storage (cached — re-walk at most every 60s) ───────────────────
   const uploadsDir = path.join(__dirname, '../../uploads');
-  const storageSizeBytes = getDirSizeBytes(uploadsDir);
-  let fileCount = 0;
-  try { fileCount = fs.readdirSync(uploadsDir).length; } catch {}
+  if (Date.now() - storageCached.ts > 60_000) {
+    storageCached.usedBytes = getDirSizeBytes(uploadsDir);
+    try { storageCached.fileCount = fs.readdirSync(uploadsDir).length; } catch {}
+    storageCached.ts = Date.now();
+  }
+  const storageSizeBytes = storageCached.usedBytes;
+  const fileCount = storageCached.fileCount;
 
   res.json({
     cpu: {
