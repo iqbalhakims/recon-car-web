@@ -83,7 +83,17 @@ jobs:
           envs: GHCR_TOKEN,DB_PASSWORD,ADMIN_USERNAME,ADMIN_PASSWORD,JWT_SECRET
           script: |
             export PATH=$PATH:/usr/bin:/usr/local/bin
-            echo "$GHCR_TOKEN" | docker login ghcr.io -u iqbalhakims --password-stdin
+
+            # Install Docker if missing
+            if ! command -v docker &> /dev/null; then
+              curl -fsSL https://get.docker.com | sh
+            fi
+
+            # Clone repo if missing, otherwise pull
+            if [ ! -d /opt/salesme/.git ]; then
+              git clone https://github.com/iqbalhakims/infra-myblog.git /opt/salesme
+            fi
+
             cd /opt/salesme
             git pull origin main
             git submodule update --init --recursive
