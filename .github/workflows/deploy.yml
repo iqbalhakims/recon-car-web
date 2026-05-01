@@ -100,7 +100,7 @@ jobs:
             cd salesme/car-sales-crm
             printf "DB_PASSWORD=%s\nDB_NAME=carcrm\n" "$DB_PASSWORD" > .env
             mkdir -p backend
-            printf "PORT=3000\nDB_HOST=db\nDB_USER=root\nDB_PASSWORD=%s\nDB_NAME=carcrm\nADMIN_USERNAME=%s\nADMIN_PASSWORD=%s\nJWT_SECRET=%s\n" "$DB_PASSWORD" "$ADMIN_USERNAME" "$ADMIN_PASSWORD" "$JWT_SECRET" > backend/.env
+            printf "PORT=3000\nDB_HOST=db\nDB_USER=root\nDB_PASSWORD=%s\nDB_NAME=carcrm\nADMIN_USERNAME=%s\nADMIN_PASSWORD=%s\nJWT_SECRET=%s\nFRONTEND_URL=%s\nREDIS_URL=redis://redis:6379\nSMTP_USER=%s\nSMTP_PASS=%s\nNOTIFY_EMAIL=%s\n" "$DB_PASSWORD" "$ADMIN_USERNAME" "$ADMIN_PASSWORD" "$JWT_SECRET" "$FRONTEND_URL" "$SMTP_USER" "$SMTP_PASS" "$NOTIFY_EMAIL" > backend/.env
             docker compose pull frontend backend
             docker compose up -d
             docker image prune -f
@@ -110,3 +110,7 @@ jobs:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
