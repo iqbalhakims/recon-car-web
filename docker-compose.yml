@@ -47,7 +47,7 @@ services:
       --max-connections=50
       --tmp-table-size=16M
       --max-heap-table-size=16M
-    mem_limit: 256m
+    mem_limit: 400m
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
