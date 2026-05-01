@@ -7,6 +7,7 @@ import SystemPage from './SystemPage';
 import AppointmentsPage from './AppointmentsPage';
 import UsersPage from './UsersPage';
 import AnalyticsPage from './AnalyticsPage';
+import JiraPage from './JiraPage';
 import { clearToken } from '../auth';
 import { usePerms } from '../PermContext';
 import '../index.css';
@@ -38,6 +39,7 @@ export default function AdminPage() {
           <button className={page === 'appointments' ? 'active' : ''} onClick={() => navTo('appointments')}>Appointments</button>
           <button className={page === 'analytics' ? 'active' : ''} onClick={() => navTo('analytics')}>Analytics</button>
           <button className={page === 'system' ? 'active' : ''} onClick={() => navTo('system')}>System</button>
+          <button className={page === 'jira' ? 'active' : ''} onClick={() => navTo('jira')}>Board</button>
           {role === 'admin' && (
             <button className={page === 'users' ? 'active' : ''} onClick={() => navTo('users')}>Users</button>
           )}
@@ -53,6 +55,7 @@ export default function AdminPage() {
         {page === 'analytics'    && <AnalyticsPage />}
         {page === 'system'       && <SystemPage />}
         {page === 'users' && role === 'admin' && <UsersPage />}
+        {page === 'jira'        && <JiraPage />}
       </div>
     </div>
   );

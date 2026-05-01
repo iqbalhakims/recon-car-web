@@ -14,6 +14,7 @@ const systemRoutes = require('./routes/systemRoutes');
 const visitorRoutes = require('./routes/visitorRoutes');
 const userRoutes = require('./routes/userRoutes');
 const customerRoutes = require('./routes/customerRoutes');
+const jiraRoutes = require('./routes/jiraRoutes');
 const { seedAdmin } = require('./controllers/authController');
 
 const pool = require('./config/database');
@@ -54,6 +55,7 @@ app.use('/api/visitors', visitorRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/customer', customerRoutes);
+app.use('/api/jira', jiraRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Car Sales CRM API is running' });
@@ -83,6 +85,33 @@ async function runMigrations() {
     await pool.query(`UPDATE leads SET profile_token = ? WHERE id = ?`, [token, lead.id]);
   }
   if (missing.length > 0) console.log(`[Migration] Backfilled profile_token for ${missing.length} leads`);
+
+  // Jira tables
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS jira_projects (
+      id          INT AUTO_INCREMENT PRIMARY KEY,
+      name        VARCHAR(255) NOT NULL,
+      key_code    VARCHAR(10)  NOT NULL UNIQUE,
+      description TEXT,
+      created_by  INT,
+      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS jira_issues (
+      id          INT AUTO_INCREMENT PRIMARY KEY,
+      project_id  INT NOT NULL,
+      title       VARCHAR(500) NOT NULL,
+      description TEXT,
+      status      ENUM('todo','inprogress','review','done') DEFAULT 'todo',
+      priority    ENUM('low','medium','high','critical')    DEFAULT 'medium',
+      assignee    VARCHAR(255),
+      reporter_id INT,
+      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (project_id) REFERENCES jira_projects(id) ON DELETE CASCADE
+    )
+  `);
 }
 
 waitForDb()
