@@ -3,6 +3,7 @@ USE carcrm;
 
 CREATE TABLE IF NOT EXISTS cars (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  ref_no VARCHAR(10) UNIQUE,
   model VARCHAR(255),
   price INT,
   mileage INT,
@@ -33,6 +34,8 @@ CREATE TABLE IF NOT EXISTS leads (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255),
   phone VARCHAR(50),
+  email VARCHAR(255),
+  profile_token VARCHAR(64) UNIQUE,
   car_id INT,
   status VARCHAR(50) DEFAULT 'new',
   next_follow_up_date DATE,
