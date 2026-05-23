@@ -140,6 +140,7 @@ export default function HomePage() {
           <h1 className="pub-brand">iqbalhakim</h1>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="about-btn" onClick={() => aboutRef.current?.scrollIntoView({ behavior: 'smooth' })}>About Us</button>
+            <button className="admin-btn" onClick={() => navigate('/blog')}>📝 Blog</button>
             <button className="admin-btn" onClick={() => navigate('/admin')}>⚙️ Admin</button>
           </div>
         </div>

@@ -15,6 +15,7 @@ const visitorRoutes = require('./routes/visitorRoutes');
 const userRoutes = require('./routes/userRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const jiraRoutes = require('./routes/jiraRoutes');
+const blogRoutes = require('./routes/blogRoutes');
 const { seedAdmin } = require('./controllers/authController');
 
 const pool = require('./config/database');
@@ -56,6 +57,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/jira', jiraRoutes);
+app.use('/api/blog', blogRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Car Sales CRM API is running' });
@@ -97,6 +99,23 @@ async function runMigrations() {
       created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  // Blog table
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS blog_posts (
+      id               INT AUTO_INCREMENT PRIMARY KEY,
+      title            VARCHAR(255) NOT NULL,
+      slug             VARCHAR(255) NOT NULL UNIQUE,
+      excerpt          TEXT,
+      content          LONGTEXT NOT NULL,
+      meta_description VARCHAR(320),
+      cover_image      VARCHAR(500),
+      published        TINYINT(1) DEFAULT 0,
+      author           VARCHAR(100),
+      created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS jira_issues (
       id          INT AUTO_INCREMENT PRIMARY KEY,
