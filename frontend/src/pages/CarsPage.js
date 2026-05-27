@@ -281,6 +281,104 @@ function VideoGallery({ carId }) {
   );
 }
 
+function Spin360Gallery({ carId }) {
+  const [frames, setFrames] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef();
+
+  const fetchFrames = async () => {
+    const res = await fetch(`${API}/${carId}/spin`);
+    const data = await res.json();
+    if (data.success) setFrames(data.data);
+  };
+
+  useEffect(() => { fetchFrames(); }, [carId]);
+
+  const handleUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      // Upload sequentially to preserve file-picker order (frame 1 → frame N)
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('image', file);
+        await fetch(`${API}/${carId}/spin`, { method: 'POST', body: fd });
+      }
+      await fetchFrames();
+    } catch (err) {
+      alert('Upload failed: ' + err.message);
+    } finally {
+      setUploading(false);
+      fileRef.current.value = '';
+    }
+  };
+
+  const handleDelete = async (frameId) => {
+    if (!window.confirm('Delete this frame?')) return;
+    await fetch(`${API}/${carId}/spin/${frameId}`, { method: 'DELETE' });
+    fetchFrames();
+  };
+
+  const handleDeleteAll = async () => {
+    if (!window.confirm(`Delete all ${frames.length} spin frames?`)) return;
+    for (const f of frames) {
+      await fetch(`${API}/${carId}/spin/${f.id}`, { method: 'DELETE' });
+    }
+    fetchFrames();
+  };
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div style={{ fontSize: '0.78rem', color: '#888', marginBottom: 8 }}>
+        Upload frames in order (frame 1 first). Name files sequentially, e.g. <code>spin_01.webp … spin_24.webp</code> so the file picker sorts them correctly.
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+        {frames.map((f, i) => (
+          <div key={f.id} style={{ position: 'relative' }}>
+            <img
+              src={`/uploads/${f.filename}`}
+              alt={`frame ${i + 1}`}
+              style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 6, border: '2px solid #d0e4ff' }}
+            />
+            <div style={{ position: 'absolute', bottom: 2, left: 2, background: 'rgba(0,0,0,0.55)', color: '#fff', fontSize: 9, borderRadius: 3, padding: '1px 3px' }}>
+              {i + 1}
+            </div>
+            <button
+              onClick={() => handleDelete(f.id)}
+              style={{
+                position: 'absolute', top: -6, right: -6,
+                background: '#e94560', color: 'white', border: 'none',
+                borderRadius: '50%', width: 18, height: 18, fontSize: 10,
+                cursor: 'pointer', lineHeight: '18px', textAlign: 'center', padding: 0,
+              }}>✕</button>
+          </div>
+        ))}
+        <label style={{
+          width: 64, height: 48, border: '2px dashed #90b8f8', borderRadius: 6,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: uploading ? 'default' : 'pointer', color: '#90b8f8', fontSize: 22, flexShrink: 0,
+        }}>
+          {uploading ? '…' : '+'}
+          <input type="file" accept="image/*" multiple ref={fileRef} onChange={handleUpload} style={{ display: 'none' }} disabled={uploading} />
+        </label>
+      </div>
+      {frames.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: '0.82rem', color: '#555' }}>{frames.length} frame{frames.length !== 1 ? 's' : ''}</span>
+          <button
+            className="btn btn-sm"
+            onClick={handleDeleteAll}
+            style={{ background: '#fde8ec', color: '#c0392b', fontSize: '0.78rem' }}
+          >
+            🗑 Delete all
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CarsPage() {
   const { perms } = usePerms();
   const [cars, setCars] = useState([]);
@@ -291,6 +389,7 @@ export default function CarsPage() {
   const [expanded, setExpanded] = useState(null);
   const [expandedDents, setExpandedDents] = useState(null);
   const [expandedVideos, setExpandedVideos] = useState(null);
+  const [expandedSpin, setExpandedSpin] = useState(null);
   const [editing, setEditing] = useState(null); // car id being edited
   const [editForm, setEditForm] = useState({});
   const [modelSearch, setModelSearch] = useState('');
@@ -440,7 +539,7 @@ export default function CarsPage() {
           </div>
           <div className="table-wrap"><table>
             <thead>
-              <tr><th>Ref</th><th>Model</th><th>Photos</th><th>Videos</th><th>Dents</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
+              <tr><th>Ref</th><th>Model</th><th>Photos</th><th>Videos</th><th>Dents</th><th>360°</th><th>Price</th><th>Mileage</th><th>Status</th><th>Action</th><th></th><th></th></tr>
             </thead>
             <tbody>
               {filteredCars.map(car => (
@@ -473,6 +572,15 @@ export default function CarsPage() {
                         style={{ whiteSpace: 'nowrap' }}
                       >
                         {expandedDents === car.id ? '▲ Hide' : '🔧 Dents'}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => setExpandedSpin(expandedSpin === car.id ? null : car.id)}
+                        style={{ whiteSpace: 'nowrap' }}
+                      >
+                        {expandedSpin === car.id ? '▲ Hide' : '🔄 360°'}
                       </button>
                     </td>
                     <td>RM{car.price?.toLocaleString()}</td>
@@ -523,7 +631,7 @@ export default function CarsPage() {
                   </tr>
                   {editing === car.id && (
                     <tr>
-                      <td colSpan="11" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
+                      <td colSpan="12" style={{ background: '#f0f4ff', padding: '12px 16px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
                           <input placeholder="Ref No" value={editForm.ref_no} onChange={e => setEditForm({ ...editForm, ref_no: e.target.value })} style={{ flex: '1 1 90px' }} />
                           <input placeholder="Model" value={editForm.model} onChange={e => setEditForm({ ...editForm, model: e.target.value })} style={{ flex: '2 1 180px' }} />
@@ -539,7 +647,7 @@ export default function CarsPage() {
                   )}
                   {expanded === car.id && (
                     <tr>
-                      <td colSpan="11" style={{ background: '#fafafa', padding: '12px 16px' }}>
+                      <td colSpan="12" style={{ background: '#fafafa', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>📷 Photos</div>
                         <ImageGallery carId={car.id} />
                       </td>
@@ -547,7 +655,7 @@ export default function CarsPage() {
                   )}
                   {expandedVideos === car.id && (
                     <tr>
-                      <td colSpan="11" style={{ background: '#f0f7ff', padding: '12px 16px' }}>
+                      <td colSpan="12" style={{ background: '#f0f7ff', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>🎥 Videos</div>
                         <VideoGallery carId={car.id} />
                       </td>
@@ -555,15 +663,23 @@ export default function CarsPage() {
                   )}
                   {expandedDents === car.id && (
                     <tr>
-                      <td colSpan="11" style={{ background: '#fff8f0', padding: '12px 16px' }}>
+                      <td colSpan="12" style={{ background: '#fff8f0', padding: '12px 16px' }}>
                         <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>🔧 Dents & Scratches</div>
                         <DentGallery carId={car.id} />
                       </td>
                     </tr>
                   )}
+                  {expandedSpin === car.id && (
+                    <tr>
+                      <td colSpan="12" style={{ background: '#eef4ff', padding: '12px 16px' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginBottom: 6 }}>🔄 360° Spin Frames</div>
+                        <Spin360Gallery carId={car.id} />
+                      </td>
+                    </tr>
+                  )}
                 </React.Fragment>
               ))}
-              {cars.length === 0 && <tr><td colSpan="11" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
+              {cars.length === 0 && <tr><td colSpan="12" style={{textAlign:'center',color:'#aaa'}}>No cars yet</td></tr>}
             </tbody>
           </table></div>
         </div>

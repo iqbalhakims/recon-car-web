@@ -88,6 +88,17 @@ async function runMigrations() {
   }
   if (missing.length > 0) console.log(`[Migration] Backfilled profile_token for ${missing.length} leads`);
 
+  // 360° spin images
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS car_spin_images (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      car_id     INT NOT NULL,
+      filename   VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+    )
+  `);
+
   // Jira tables
   await pool.query(`
     CREATE TABLE IF NOT EXISTS jira_projects (

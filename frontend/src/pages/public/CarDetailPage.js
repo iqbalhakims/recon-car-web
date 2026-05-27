@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './public.css';
 import useVisitorTrack from '../../useVisitorTrack';
+import Car360Viewer from '../../components/Car360Viewer';
 
 function LoanCalculator({ carPrice, carModel, carYear, carRef }) {
   const [dp, setDp] = useState(Math.round(carPrice * 0.1));
@@ -113,6 +114,7 @@ export default function CarDetailPage() {
   const navigate = useNavigate();
   const [car, setCar] = useState(null);
   const [images, setImages] = useState([]);
+  const [spin360, setSpin360] = useState([]);
   const [dents, setDents] = useState([]);
   const [videos, setVideos] = useState([]);
   const [active, setActive] = useState(0);
@@ -120,12 +122,16 @@ export default function CarDetailPage() {
   const [lightbox, setLightbox] = useState(false);
 
   useEffect(() => {
+    const safeFetch = (url) =>
+      fetch(url).then(r => r.json()).catch(() => ({ success: false, data: [] }));
+
     Promise.all([
-      fetch(`/api/cars`).then(r => r.json()),
-      fetch(`/api/cars/${id}/images`).then(r => r.json()),
-      fetch(`/api/cars/${id}/dents`).then(r => r.json()),
-      fetch(`/api/cars/${id}/videos`).then(r => r.json()),
-    ]).then(([carsData, imagesData, dentsData, videosData]) => {
+      safeFetch(`/api/cars`),
+      safeFetch(`/api/cars/${id}/images`),
+      safeFetch(`/api/cars/${id}/dents`),
+      safeFetch(`/api/cars/${id}/videos`),
+      safeFetch(`/api/cars/${id}/spin`),
+    ]).then(([carsData, imagesData, dentsData, videosData, spinData]) => {
       if (carsData.success) {
         const found = carsData.data.find(c => c.id === parseInt(id));
         setCar(found || null);
@@ -133,6 +139,7 @@ export default function CarDetailPage() {
       if (imagesData.success) setImages(imagesData.data);
       if (dentsData.success) setDents(dentsData.data);
       if (videosData.success) setVideos(videosData.data);
+      if (spinData.success) setSpin360(spinData.data.map(f => `/uploads/${f.filename}`));
       setLoading(false);
     });
     // Track click for trending
@@ -264,6 +271,14 @@ export default function CarDetailPage() {
 
           </div>
         </div>
+
+        {/* 360° Spin Viewer */}
+        {spin360.length >= 2 && (
+          <div className="dent-section">
+            <h3 className="dent-title">🔄 360° View</h3>
+            <Car360Viewer images={spin360} />
+          </div>
+        )}
 
         {/* Dents & Scratches */}
         {dents.length > 0 && (

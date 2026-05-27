@@ -22,7 +22,18 @@ const videoFilter = (req, file, cb) => {
   else cb(new Error('Only video files allowed'), false);
 };
 
+const spinStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, path.join(__dirname, '../../uploads'));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `spin_${req.params.id}_${Date.now()}${ext}`);
+  },
+});
+
 const imageUpload = multer({ storage, fileFilter: imageFilter, limits: { fileSize: 10 * 1024 * 1024 } });
 const videoUpload = multer({ storage, fileFilter: videoFilter, limits: { fileSize: 200 * 1024 * 1024 } });
+const spinImageUpload = multer({ storage: spinStorage, fileFilter: imageFilter, limits: { fileSize: 10 * 1024 * 1024 } });
 
-module.exports = { imageUpload, videoUpload };
+module.exports = { imageUpload, videoUpload, spinImageUpload };

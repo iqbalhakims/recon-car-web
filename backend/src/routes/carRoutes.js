@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const carController = require('../controllers/carController');
-const { imageUpload } = require('../middleware/upload');
+const { imageUpload, spinImageUpload } = require('../middleware/upload');
 const imageController = require('../controllers/imageController');
+const spinImageController = require('../controllers/spinImageController');
 const trendingController = require('../controllers/trendingController');
 
 // Trending — must be before /:id routes
@@ -26,5 +27,10 @@ const dentController = require('../controllers/dentController');
 router.get('/:id/dents', dentController.getDents);
 router.post('/:id/dents', imageUpload.single('image'), dentController.upload);
 router.delete('/:id/dents/:dentId', dentController.delete);
+
+// 360° spin frame routes
+router.get('/:id/spin', spinImageController.getFrames);
+router.post('/:id/spin', spinImageUpload.single('image'), spinImageController.upload);
+router.delete('/:id/spin/:frameId', spinImageController.delete);
 
 module.exports = router;
