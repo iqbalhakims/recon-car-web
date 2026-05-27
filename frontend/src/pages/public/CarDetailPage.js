@@ -276,7 +276,7 @@ export default function CarDetailPage() {
         {spin360.length >= 2 && (
           <div className="dent-section">
             <h3 className="dent-title">🔄 360° View</h3>
-            <Car360Viewer images={spin360} />
+            <Car360Viewer images={spin360} autoplaySpeed={120} />
           </div>
         )}
 
