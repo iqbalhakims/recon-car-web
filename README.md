@@ -16,6 +16,7 @@ A full-stack Customer Relationship Management (CRM) system for car dealerships. 
 - [Customer Profile System](#customer-profile-system)
 - [Trending & Analytics](#trending--analytics)
 - [Email Notifications](#email-notifications)
+- [Database Backup & Recovery](#database-backup--recovery)
 - [Known Issues & Troubleshooting](#known-issues--troubleshooting)
 - [Environment Variables](#environment-variables)
 - [Getting Started](#getting-started)
@@ -501,6 +502,141 @@ FRONTEND_URL=https://iqbalhakim.site
 > `SMTP_PASS` must be a **Gmail App Password** (not your account password). Generate one at: Google Account → Security → 2-Step Verification → App passwords.
 
 If `SMTP_USER` or `SMTP_PASS` are not set, email sending is skipped with a console warning — the site continues to work normally.
+
+---
+
+## Database Backup & Recovery
+
+### Automated Daily Backup
+
+The script `scripts/backup-db.sh` runs a compressed `mysqldump` every night and keeps the last 7 days locally at `/opt/backups/carcrm/`.
+
+#### Setup on server (one-time)
+
+```bash
+# 1. Pull latest code
+cd /opt/salesme/salesme/car-sales-crm && git pull origin main
+
+# 2. Make scripts executable
+chmod +x scripts/backup-db.sh scripts/restore-db.sh
+
+# 3. Test manually
+bash scripts/backup-db.sh
+
+# 4. Schedule daily at 3am
+(crontab -l 2>/dev/null; echo "0 3 * * * bash /opt/salesme/salesme/car-sales-crm/scripts/backup-db.sh >> /var/log/carcrm-backup.log 2>&1") | crontab -
+
+# 5. Verify cron is set
+crontab -l
+```
+
+#### Restore from backup
+
+```bash
+# Restore latest backup
+bash /opt/salesme/salesme/car-sales-crm/scripts/restore-db.sh latest
+
+# Restore specific file
+bash /opt/salesme/salesme/car-sales-crm/scripts/restore-db.sh /opt/backups/carcrm/carcrm_2026-05-26_03-00-00.sql.gz
+
+# Then restart backend
+docker restart car-sales-crm-backend-1
+```
+
+#### Optional: upload to DigitalOcean Spaces
+
+Edit `scripts/backup-db.sh` and fill in:
+
+```bash
+DO_SPACES_BUCKET="your-bucket"
+DO_SPACES_REGION="sgp1"
+DO_SPACES_KEY="your-access-key"
+DO_SPACES_SECRET="your-secret-key"
+```
+
+Spaces costs ~$5/month for 250 GB — enough for years of daily DB dumps.
+
+---
+
+### Ransomware Incident — May 2026
+
+#### Root cause
+
+MySQL port `3306` was publicly bound to `0.0.0.0` in `docker-compose.yml`:
+
+```yaml
+ports:
+  - "3306:3306"   # ← exposed to the entire internet
+```
+
+Automated ransomware bots continuously scan the internet for open MySQL ports. Once they found port 3306, they logged in as `root` (weak or default password), dropped all tables, created a `RECOVER_YOUR_DATA_info` ransom table, and revoked `root` privileges from the network IP to prevent easy recovery.
+
+The attack happened **multiple times** because:
+1. The port was publicly exposed from initial deployment
+2. Docker bypasses `ufw`/`iptables` firewall rules by writing directly to `iptables` — so even if the OS firewall was configured, Docker's port binding still exposed MySQL externally
+3. After the first wipe, the database was restored but the MySQL volume persisted in a broken state (privileges stripped), allowing re-entry
+
+#### What was fixed
+
+**1. Bind MySQL to localhost only** (`docker-compose.yml`):
+
+```yaml
+ports:
+  - "127.0.0.1:3306:3306"   # ← only reachable from the droplet itself
+```
+
+This means the internet cannot reach MySQL at all. Docker internal networking (backend → db) still works normally because containers communicate over the internal Docker network, not through the host port.
+
+**2. Automated daily backups** — even if the DB is wiped again, `restore-db.sh latest` recovers everything in under 60 seconds.
+
+#### Full manual recovery steps
+
+Run these on the server whenever the DB is missing or wiped:
+
+```bash
+# Step 1 — restore MySQL root privileges (if stripped by attacker)
+docker exec car-sales-crm-db-1 sh -c \
+  'mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON *.* TO '"'"'root'"'"'@'"'"'%'"'"' WITH GRANT OPTION; FLUSH PRIVILEGES;"'
+
+# Step 2 — recreate the database
+docker exec car-sales-crm-db-1 sh -c \
+  'mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS carcrm; CREATE DATABASE carcrm;"'
+
+# Step 3 — restore from latest backup (if available)
+bash /opt/salesme/salesme/car-sales-crm/scripts/restore-db.sh latest
+
+# OR import schema from init.sql (loses all data, but gets site running)
+docker exec -i car-sales-crm-db-1 sh -c \
+  'mysql -u root -p"$MYSQL_ROOT_PASSWORD" carcrm' < /opt/salesme/salesme/car-sales-crm/init.sql
+
+# Step 4 — verify tables exist
+docker exec car-sales-crm-db-1 sh -c \
+  'mysql -u root -p"$MYSQL_ROOT_PASSWORD" carcrm -e "SHOW TABLES;"'
+
+# Step 5 — restart backend
+docker restart car-sales-crm-backend-1
+
+# Step 6 — confirm it's up
+docker logs car-sales-crm-backend-1 --tail 5
+# Expected: "Server running on port 3000"
+```
+
+#### How to verify port 3306 is no longer exposed
+
+```bash
+docker ps --format "{{.Names}}\t{{.Ports}}"
+```
+
+Expected output for the db container:
+```
+car-sales-crm-db-1   127.0.0.1:3306->3306/tcp   ← safe
+```
+
+If you see `0.0.0.0:3306->3306/tcp` instead, the fix didn't take. Redeploy:
+
+```bash
+cd /opt/salesme/salesme/car-sales-crm && docker compose down && docker compose up -d
+```
 
 ---
 
